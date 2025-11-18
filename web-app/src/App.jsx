@@ -144,16 +144,24 @@ function App() {
     setCvData(cvData)
     setShowCVUpload(false)
     
-    // Eksik bilgiler varsa kullanıcıya göster
+    // Eksik bilgiler varsa kullanıcıya göster ve formu doldur
     const missingFields = []
     if (!cvData.gpa) missingFields.push('GPA')
     if (!cvData.languageTestScore) missingFields.push('Dil Skoru')
     if (cvData.background.length === 0) missingFields.push('Background')
     
+    // Eksik bilgiler varsa formu göster ve çıkarılan verileri doldur
     if (missingFields.length > 0) {
-      alert(`CV'nizden bazı bilgiler çıkarılamadı:\n${missingFields.join(', ')}\n\nLütfen bu bilgileri manuel olarak girin.`)
-      setShowForm(true)
-      return
+      const confirmMessage = `CV'nizden bazı bilgiler çıkarılamadı:\n${missingFields.join(', ')}\n\nÇıkarılan bilgilerle formu açmak ister misiniz?`
+      if (window.confirm(confirmMessage)) {
+        setShowForm(true)
+        // Form component'ine verileri geç (InputForm'da pre-fill yapılacak)
+        return
+      } else {
+        setShowCVUpload(true)
+        setUploadedFile(null)
+        return
+      }
     }
     
     // Otomatik analiz ve sonuçları göster
@@ -240,7 +248,7 @@ function App() {
               ⚠️ {error}
             </div>
           )}
-          <InputForm onSubmit={handleSubmit} loading={loading} />
+          <InputForm onSubmit={handleSubmit} loading={loading} initialData={cvData} />
         </div>
       )}
 

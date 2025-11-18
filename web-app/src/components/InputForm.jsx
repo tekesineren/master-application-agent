@@ -177,7 +177,7 @@ function formatBackgroundName(name) {
     .join(' ')
 }
 
-function InputForm({ onSubmit, loading }) {
+function InputForm({ onSubmit, loading, initialData = null }) {
   const [formData, setFormData] = useState({
     gpa: '',
     languageScore: '',
@@ -205,6 +205,30 @@ function InputForm({ onSubmit, loading }) {
   
   // CV'den gelen önerileri simüle et (gerçekte CV parse edilecek)
   const [suggestedBackgrounds, setSuggestedBackgrounds] = useState([])
+  
+  // Initial data varsa formu doldur (CV'den gelen veriler)
+  useState(() => {
+    if (initialData) {
+      setFormData(prev => ({
+        ...prev,
+        gpa: initialData.gpa || prev.gpa,
+        language: initialData.language || prev.language,
+        languageTestType: initialData.languageTestType || prev.languageTestType,
+        languageTestScore: initialData.languageTestScore || prev.languageTestScore,
+        background: initialData.background || prev.background,
+        researchExperience: initialData.researchExperience || prev.researchExperience,
+        workExperience: initialData.workExperience || prev.workExperience,
+        publications: initialData.publications || prev.publications,
+        country: initialData.country || prev.country,
+        gradingSystem: initialData.gradingSystem || prev.gradingSystem
+      }))
+      
+      // Background önerilerini ayarla
+      if (initialData.background && initialData.background.length > 0) {
+        setSuggestedBackgrounds(initialData.background.slice(0, 3))
+      }
+    }
+  })
 
   const handleChange = (e) => {
     const { name, value } = e.target
