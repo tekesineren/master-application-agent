@@ -54,12 +54,23 @@ function App() {
             },
             body: JSON.stringify({
               gpa: parseFloat(formData.gpa),
-              language_score: parseInt(formData.languageScore),
+              language_score: parseInt(formData.languageScore) || 0,
               background: formData.background,
               research_experience: parseFloat(formData.researchExperience) || 0,
               work_experience: parseFloat(formData.workExperience) || 0,
               publications: parseInt(formData.publications) || 0,
-              recommendation_letters: parseInt(formData.recommendationLetters) || 0
+              recommendation_letters: parseInt(formData.recommendationLetters) || 0,
+              country: formData.country,
+              entrance_exam_type: formData.entranceExamType,
+              entrance_exam_score: formData.entranceExamScore ? parseFloat(formData.entranceExamScore) : null,
+              entrance_exam_rank: formData.entranceExamRank ? parseInt(formData.entranceExamRank) : null,
+              undergraduate_university_ranking: formData.undergraduateUniversityRanking,
+              gre_score: formData.greScore ? parseInt(formData.greScore) : null,
+              gmat_score: formData.gmatScore ? parseInt(formData.gmatScore) : null,
+              project_experience: formData.projectExperience,
+              competition_achievements: formData.competitionAchievements,
+              has_masters_degree: formData.hasMastersDegree,
+              masters_university_ranking: formData.mastersUniversityRanking
             }),
             signal: controller.signal
           })

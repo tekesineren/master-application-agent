@@ -223,70 +223,225 @@ UNIVERSITIES = [
     }
 ]
 
+def calculate_entrance_exam_bonus(user_data):
+    """
+    Giriş sınavı bazlı ek puan hesaplar (Türkiye ÖSYM sistemi)
+    """
+    entrance_exam_type = user_data.get('entrance_exam_type', '')
+    entrance_exam_rank = user_data.get('entrance_exam_rank')
+    
+    if entrance_exam_type == 'osym' and entrance_exam_rank:
+        rank = int(entrance_exam_rank)
+        if rank <= 10000:
+            return 0.0  # Zaten yüksek, ek puan gerekmez
+        elif rank <= 20000:
+            return 0.0
+        elif rank <= 30000:
+            return 0.0
+        elif rank <= 40000:
+            return 0.0
+        elif rank <= 50000:
+            return 0.0
+        else:
+            # 50.000'den büyükse: (20.000 / Sıralama) ek puan
+            return min(0.4, 20000.0 / rank)
+    
+    return 0.0
+
+def calculate_bonus_points(user_data):
+    """
+    Ek puan kriterlerini hesaplar (Savunma Sanayisi kriterlerine göre)
+    """
+    bonus = 0.0
+    
+    # 1. İş deneyimi ek puanı
+    work_exp = user_data.get('work_experience', 0)
+    if 2 <= work_exp < 5:
+        bonus += 0.2
+    elif 5 <= work_exp < 10:
+        bonus += 0.4
+    elif work_exp >= 10:
+        bonus += 0.6  # 10+ yıl için ekstra
+    
+    # 2. Yüksek lisans derecesi ek puanı
+    has_masters = user_data.get('has_masters_degree', False)
+    masters_ranking = user_data.get('masters_university_ranking', '')
+    if has_masters:
+        if masters_ranking in ['top100', 'top500', 'top1000']:
+            bonus += 0.2
+        else:
+            bonus += 0.1
+    
+    # 3. Lisans üniversitesi sıralaması (dolaylı etki - GPA'ya eklenir)
+    # Bu kısım GPA hesaplamasında kullanılacak
+    
+    # 4. Proje deneyimi ek puanı
+    project_exp = user_data.get('project_experience', 'none')
+    if project_exp == 'national':
+        bonus += 0.1
+    elif project_exp == 'eu':
+        bonus += 0.15
+    elif project_exp == 'international':
+        bonus += 0.15
+    elif project_exp == 'multiple':
+        bonus += 0.2
+    
+    # 5. Yayınlar ek puanı (SCI, SCI Exp, SSCI)
+    publications = user_data.get('publications', 0)
+    if publications >= 1:
+        bonus += 0.1
+    
+    # 6. GRE/GMAT ek puanı
+    gre_score = user_data.get('gre_score')
+    gmat_score = user_data.get('gmat_score')
+    if gre_score and gre_score >= 320:
+        bonus += 0.1
+    elif gre_score and gre_score >= 310:
+        bonus += 0.05
+    if gmat_score and gmat_score >= 700:
+        bonus += 0.1
+    elif gmat_score and gmat_score >= 650:
+        bonus += 0.05
+    
+    # 7. Yarışma başarıları ek puanı
+    competition = user_data.get('competition_achievements', 'none')
+    if competition == 'bronze':
+        bonus += 0.05
+    elif competition == 'silver':
+        bonus += 0.08
+    elif competition == 'gold':
+        bonus += 0.1
+    elif competition == 'multiple':
+        bonus += 0.15
+    
+    return min(bonus, 1.0)  # Maksimum 1.0 ek puan
+
+def calculate_minimum_gpa_requirement(user_data):
+    """
+    Ülke ve giriş sınavı bazlı minimum GPA gereksinimini hesaplar
+    """
+    gpa = user_data.get('gpa', 0)
+    country = user_data.get('country', 'turkey')
+    entrance_exam_type = user_data.get('entrance_exam_type', '')
+    entrance_exam_rank = user_data.get('entrance_exam_rank')
+    
+    # Türkiye için ÖSYM sistemi
+    if country == 'turkey' and entrance_exam_type == 'osym' and entrance_exam_rank:
+        rank = int(entrance_exam_rank)
+        entrance_bonus = calculate_entrance_exam_bonus(user_data)
+        bonus_points = calculate_bonus_points(user_data)
+        
+        if rank <= 10000:
+            return 2.60 - bonus_points - entrance_bonus
+        elif rank <= 20000:
+            return 2.70 - bonus_points - entrance_bonus
+        elif rank <= 30000:
+            return 2.80 - bonus_points - entrance_bonus
+        elif rank <= 40000:
+            return 2.90 - bonus_points - entrance_bonus
+        elif rank <= 50000:
+            return 3.00 - bonus_points - entrance_bonus
+        else:
+            # 50.000'den büyükse: (20.000 / Sıralama) + GPA + Ek Puan ≥ 3.40
+            required = 3.40 - (20000.0 / rank) - bonus_points - entrance_bonus
+            return max(2.50, required)
+    
+    # Diğer ülkeler için standart minimum
+    return 2.50
+
 def calculate_match_score(user_data, university):
     """
-    Kullanıcı verilerine göre okul eşleşme skorunu hesaplar
+    Gelişmiş eşleşme skoru hesaplama (Savunma Sanayisi kriterlerine göre uyarlanmış)
     
-    Parametreler:
-    - GPA: 0-4.0 arası (25 puan)
-    - Dil skoru (language_score): 0-120 arası (20 puan)
-    - Background: ilgili alanlar listesi (20 puan)
-    - Research experience: Araştırma deneyimi yıl (15 puan)
-    - Work experience: İş deneyimi yıl (10 puan)
-    - Publications: Yayın sayısı (5 puan)
-    - Recommendation letters: Referans mektubu sayısı (5 puan)
+    Temel Puanlar (100 puan üzerinden):
+    - GPA: 30 puan
+    - Dil skoru: 20 puan
+    - Background: 15 puan
+    - Research experience: 10 puan
+    - Work experience: 8 puan
+    - Publications: 5 puan
+    - Recommendation letters: 5 puan
+    - University ranking: 4 puan
+    - GRE/GMAT: 3 puan
+    
+    Ek Puanlar (bonus):
+    - Proje deneyimi
+    - Yarışma başarıları
+    - Yüksek lisans derecesi
     """
-    score = 0
-    max_score = 100
+    score = 0.0
+    max_score = 100.0
     
-    # 1. GPA değerlendirmesi (25 puan)
+    # Minimum GPA kontrolü
     gpa = user_data.get('gpa', 0)
+    min_gpa_req = calculate_minimum_gpa_requirement(user_data)
+    
+    # 10+ yıl iş deneyimi varsa minimum GPA şartı yok
+    work_exp = user_data.get('work_experience', 0)
+    if work_exp < 10 and gpa < min_gpa_req:
+        # Minimum GPA'nin altındaysa çok düşük puan
+        return 20.0  # Çok düşük uyum
+    
+    # 1. GPA değerlendirmesi (30 puan)
     if gpa >= university['min_gpa']:
-        gpa_score = min(25, (gpa / 4.0) * 25)
+        gpa_score = min(30, (gpa / 4.0) * 30)
         score += gpa_score
     else:
-        # Minimum GPA'nin altındaysa düşük puan
-        score += (gpa / university['min_gpa']) * 12
+        score += (gpa / university['min_gpa']) * 15
+    
+    # Üniversite sıralaması bonusu (GPA'ya eklenir)
+    undergrad_ranking = user_data.get('undergraduate_university_ranking', '')
+    if undergrad_ranking == 'top100':
+        score += 2.0
+    elif undergrad_ranking == 'top500':
+        score += 1.5
+    elif undergrad_ranking == 'top1000':
+        score += 1.0
     
     # 2. Dil skoru değerlendirmesi (20 puan)
     language_score = user_data.get('language_score', 0)
-    if language_score >= university['min_language_score']:
-        lang_score = min(20, (language_score / 120) * 20)
-        score += lang_score
+    if language_score >= 100:  # TOEFL 100+ / IELTS 7.0+
+        score += 20
+    elif language_score >= 90:  # TOEFL 90+ / IELTS 6.5+
+        score += 18
+    elif language_score >= 84:  # TOEFL 84+ / IELTS 6.0+
+        score += 15
+    elif language_score >= 70:  # TOEFL 70+ / IELTS 5.5+
+        score += 10
     else:
-        score += (language_score / university['min_language_score']) * 10
+        score += 5
     
-    # 3. Background eşleşmesi (20 puan)
+    # 3. Background eşleşmesi (15 puan)
     user_background = user_data.get('background', [])
     required_background = university.get('required_background', [])
     
-    # Ortak alanları bul
-    common_fields = set(user_background) & set(required_background)
-    if common_fields:
-        background_score = (len(common_fields) / len(required_background)) * 20
-        score += min(20, background_score)
-    
-    # 4. Araştırma deneyimi (15 puan)
-    research_exp = user_data.get('research_experience', 0)
-    # 2+ yıl araştırma deneyimi = tam puan
-    if research_exp >= 2:
+    if required_background:
+        common_fields = set(user_background) & set(required_background)
+        if common_fields:
+            background_score = (len(common_fields) / len(required_background)) * 15
+            score += min(15, background_score)
+    else:
+        # Background gereksinimi yoksa tam puan
         score += 15
-    elif research_exp >= 1:
-        score += 10
-    elif research_exp >= 0.5:
-        score += 5
-    # 0 yıl = 0 puan
     
-    # 5. İş deneyimi (10 puan)
-    work_exp = user_data.get('work_experience', 0)
-    # 3+ yıl iş deneyimi = tam puan
-    if work_exp >= 3:
+    # 4. Araştırma deneyimi (10 puan)
+    research_exp = user_data.get('research_experience', 0)
+    if research_exp >= 2:
         score += 10
-    elif work_exp >= 2:
+    elif research_exp >= 1:
         score += 7
-    elif work_exp >= 1:
+    elif research_exp >= 0.5:
         score += 4
-    # 0 yıl = 0 puan
+    
+    # 5. İş deneyimi (8 puan)
+    if work_exp >= 10:
+        score += 8  # 10+ yıl = tam puan
+    elif work_exp >= 5:
+        score += 6
+    elif work_exp >= 2:
+        score += 4
+    elif work_exp >= 1:
+        score += 2
     
     # 6. Yayınlar (5 puan)
     publications = user_data.get('publications', 0)
@@ -296,7 +451,6 @@ def calculate_match_score(user_data, university):
         score += 3
     elif publications >= 1:
         score += 2
-    # 0 yayın = 0 puan
     
     # 7. Referans mektupları (5 puan)
     rec_letters = user_data.get('recommendation_letters', 0)
@@ -306,9 +460,29 @@ def calculate_match_score(user_data, university):
         score += 3
     elif rec_letters >= 1:
         score += 2
-    # 0 mektup = 0 puan
     
-    return round(score, 2)
+    # 8. GRE/GMAT (3 puan)
+    gre_score = user_data.get('gre_score')
+    gmat_score = user_data.get('gmat_score')
+    if gre_score and gre_score >= 320:
+        score += 3
+    elif gre_score and gre_score >= 310:
+        score += 2
+    elif gre_score and gre_score >= 300:
+        score += 1
+    if gmat_score and gmat_score >= 700:
+        score += 3
+    elif gmat_score and gmat_score >= 650:
+        score += 2
+    elif gmat_score and gmat_score >= 600:
+        score += 1
+    
+    # Ek puanlar (bonus - maksimum 10 puan ekstra)
+    bonus_points = calculate_bonus_points(user_data)
+    score += bonus_points * 10  # 0.1 ek puan = 1 puan bonus
+    
+    # Maksimum 110 puan olabilir (100 + 10 bonus)
+    return round(min(score, 110.0), 2)
 
 @app.route('/api/health', methods=['GET'])
 def health_check():

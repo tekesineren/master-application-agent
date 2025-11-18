@@ -65,6 +65,16 @@ const approvedOtherFields = [
   'social work', 'counseling', 'theology', 'religious studies'
 ]
 
+const countries = [
+  { value: 'turkey', label: 'Türkiye', examType: 'osym' },
+  { value: 'usa', label: 'USA', examType: 'sat' },
+  { value: 'uk', label: 'UK', examType: 'a-levels' },
+  { value: 'germany', label: 'Germany', examType: 'abitur' },
+  { value: 'china', label: 'China', examType: 'gaokao' },
+  { value: 'france', label: 'France', examType: 'baccalaureat' },
+  { value: 'other', label: 'Other', examType: 'other' }
+]
+
 function InputForm({ onSubmit, loading }) {
   const [formData, setFormData] = useState({
     gpa: '',
@@ -75,7 +85,18 @@ function InputForm({ onSubmit, loading }) {
     publications: '',
     recommendationLetters: '0',
     otherBackground: '',
-    otherConfirmed: false
+    otherConfirmed: false,
+    country: 'turkey',
+    entranceExamType: 'osym',
+    entranceExamScore: '',
+    entranceExamRank: '',
+    undergraduateUniversityRanking: '',
+    greScore: '',
+    gmatScore: '',
+    projectExperience: '',
+    competitionAchievements: '',
+    hasMastersDegree: false,
+    mastersUniversityRanking: ''
   })
 
   const handleChange = (e) => {
@@ -192,7 +213,29 @@ function InputForm({ onSubmit, loading }) {
           <h2>📊 Akademik Bilgiler</h2>
           
           <div className="form-group">
-            <label htmlFor="gpa">GPA (0-4.0)</label>
+            <label htmlFor="country">Ülke</label>
+            <select
+              id="country"
+              name="country"
+              value={formData.country}
+              onChange={(e) => {
+                const selectedCountry = countries.find(c => c.value === e.target.value)
+                setFormData(prev => ({
+                  ...prev,
+                  country: e.target.value,
+                  entranceExamType: selectedCountry?.examType || 'other'
+                }))
+              }}
+            >
+              {countries.map(country => (
+                <option key={country.value} value={country.value}>{country.label}</option>
+              ))}
+            </select>
+            <small>Lisans eğitimi aldığınız ülke</small>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="gpa">GPA / Not Ortalaması (0-4.0)</label>
             <input
               type="number"
               id="gpa"
@@ -205,20 +248,98 @@ function InputForm({ onSubmit, loading }) {
               placeholder="3.5"
               required
             />
+            <small>4.00 üzerinden lisans mezuniyet not ortalaması</small>
           </div>
 
           <div className="form-group">
-            <label htmlFor="languageScore">Dil Skoru (TOEFL/IELTS)</label>
-            <input
-              type="number"
+            <label htmlFor="entranceExamType">Giriş Sınavı Türü</label>
+            <select
+              id="entranceExamType"
+              name="entranceExamType"
+              value={formData.entranceExamType}
+              onChange={handleChange}
+            >
+              <option value="osym">ÖSYM (Türkiye)</option>
+              <option value="sat">SAT (USA)</option>
+              <option value="gre">GRE</option>
+              <option value="gmat">GMAT</option>
+              <option value="a-levels">A-Levels (UK)</option>
+              <option value="abitur">Abitur (Germany)</option>
+              <option value="gaokao">Gaokao (China)</option>
+              <option value="baccalaureat">Baccalauréat (France)</option>
+              <option value="other">Diğer / Yok</option>
+            </select>
+          </div>
+
+          {formData.entranceExamType === 'osym' && (
+            <div className="form-group">
+              <label htmlFor="entranceExamRank">ÖSYM Sıralaması</label>
+              <input
+                type="number"
+                id="entranceExamRank"
+                name="entranceExamRank"
+                value={formData.entranceExamRank}
+                onChange={handleChange}
+                min="1"
+                placeholder="15000"
+              />
+              <small>Örn: 15000 (sıralama)</small>
+            </div>
+          )}
+
+          {(formData.entranceExamType === 'sat' || formData.entranceExamType === 'gre' || formData.entranceExamType === 'gmat') && (
+            <div className="form-group">
+              <label htmlFor="entranceExamScore">
+                {formData.entranceExamType === 'sat' ? 'SAT Skoru' : 
+                 formData.entranceExamType === 'gre' ? 'GRE Skoru' : 'GMAT Skoru'}
+              </label>
+              <input
+                type="number"
+                id="entranceExamScore"
+                name="entranceExamScore"
+                value={formData.entranceExamScore}
+                onChange={handleChange}
+                min="0"
+                placeholder={formData.entranceExamType === 'sat' ? '1500' : 
+                             formData.entranceExamType === 'gre' ? '320' : '700'}
+              />
+            </div>
+          )}
+
+          <div className="form-group">
+            <label htmlFor="undergraduateUniversityRanking">Lisans Üniversitesi Sıralaması</label>
+            <select
+              id="undergraduateUniversityRanking"
+              name="undergraduateUniversityRanking"
+              value={formData.undergraduateUniversityRanking}
+              onChange={handleChange}
+            >
+              <option value="">Seçiniz</option>
+              <option value="top100">QS/THE/RUR - İlk 100</option>
+              <option value="top500">QS/THE/RUR - İlk 500</option>
+              <option value="top1000">QS/THE/RUR - İlk 1000</option>
+              <option value="other">Diğer / Bilinmiyor</option>
+            </select>
+            <small>QS, THE veya RUR sıralamalarından herhangi birinde</small>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="languageScore">Yabancı Dil Skoru</label>
+            <select
               id="languageScore"
               name="languageScore"
               value={formData.languageScore}
               onChange={handleChange}
-              min="0"
-              placeholder="110"
               required
-            />
+            >
+              <option value="">Seçiniz</option>
+              <option value="100">TOEFL iBT ≥ 100 / IELTS ≥ 7.0</option>
+              <option value="90">TOEFL iBT ≥ 90 / IELTS ≥ 6.5</option>
+              <option value="84">TOEFL iBT ≥ 84 / IELTS ≥ 6.0</option>
+              <option value="70">TOEFL iBT ≥ 70 / IELTS ≥ 5.5</option>
+              <option value="0">Yok / Düşük</option>
+            </select>
+            <small>TOEFL, IELTS veya eşdeğer sınav skoru</small>
           </div>
         </div>
 
@@ -350,6 +471,107 @@ function InputForm({ onSubmit, loading }) {
               <option value="4">4+</option>
             </select>
             <small>Hazır olan referans mektubu sayısı</small>
+          </div>
+        </div>
+
+        <div className="form-section">
+          <h2>🎓 Ek Akademik Bilgiler</h2>
+          
+          <div className="form-group">
+            <label>
+              <input
+                type="checkbox"
+                checked={formData.hasMastersDegree}
+                onChange={(e) => setFormData(prev => ({ ...prev, hasMastersDegree: e.target.checked }))}
+              />
+              <span style={{ marginLeft: '8px' }}>Yüksek Lisans Derecesi Var</span>
+            </label>
+          </div>
+
+          {formData.hasMastersDegree && (
+            <div className="form-group">
+              <label htmlFor="mastersUniversityRanking">Yüksek Lisans Üniversitesi Sıralaması</label>
+              <select
+                id="mastersUniversityRanking"
+                name="mastersUniversityRanking"
+                value={formData.mastersUniversityRanking}
+                onChange={handleChange}
+              >
+                <option value="">Seçiniz</option>
+                <option value="top100">QS/THE/RUR - İlk 100</option>
+                <option value="top500">QS/THE/RUR - İlk 500</option>
+                <option value="top1000">QS/THE/RUR - İlk 1000</option>
+                <option value="other">Diğer</option>
+              </select>
+            </div>
+          )}
+
+          <div className="form-group">
+            <label htmlFor="greScore">GRE Skoru (Opsiyonel)</label>
+            <input
+              type="number"
+              id="greScore"
+              name="greScore"
+              value={formData.greScore}
+              onChange={handleChange}
+              min="260"
+              max="340"
+              placeholder="320"
+            />
+            <small>GRE General Test skoru (260-340 arası)</small>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="gmatScore">GMAT Skoru (Opsiyonel)</label>
+            <input
+              type="number"
+              id="gmatScore"
+              name="gmatScore"
+              value={formData.gmatScore}
+              onChange={handleChange}
+              min="200"
+              max="800"
+              placeholder="700"
+            />
+            <small>GMAT skoru (200-800 arası)</small>
+          </div>
+        </div>
+
+        <div className="form-section">
+          <h2>🏆 Proje ve Başarılar</h2>
+          
+          <div className="form-group">
+            <label htmlFor="projectExperience">Proje Deneyimi</label>
+            <select
+              id="projectExperience"
+              name="projectExperience"
+              value={formData.projectExperience}
+              onChange={handleChange}
+            >
+              <option value="none">Yok</option>
+              <option value="national">Ulusal Proje (TÜBİTAK, vb.)</option>
+              <option value="eu">AB Projesi</option>
+              <option value="international">Uluslararası Proje</option>
+              <option value="multiple">Birden Fazla Proje</option>
+            </select>
+            <small>Araştırmacı veya bursiyer olarak görev aldığınız projeler</small>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="competitionAchievements">Yarışma Başarıları</label>
+            <select
+              id="competitionAchievements"
+              name="competitionAchievements"
+              value={formData.competitionAchievements}
+              onChange={handleChange}
+            >
+              <option value="none">Yok</option>
+              <option value="bronze">3. (Bronz)</option>
+              <option value="silver">2. (Gümüş)</option>
+              <option value="gold">1. (Altın)</option>
+              <option value="multiple">Birden Fazla</option>
+            </select>
+            <small>TEKNOFEST, hackathon, vb. yarışmalarda derece</small>
           </div>
         </div>
 
