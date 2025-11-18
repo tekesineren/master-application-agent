@@ -82,17 +82,92 @@ const gradingSystems = {
   'other': { label: 'Diğer', min: 0, max: 100, step: 0.01, placeholder: 'Not ortalaması' }
 }
 
-const languageTests = [
-  { value: 'toefl', label: 'TOEFL iBT', min: 0, max: 120, placeholder: '100', description: 'Test of English as a Foreign Language' },
-  { value: 'ielts', label: 'IELTS Academic', min: 0, max: 9, step: 0.5, placeholder: '7.0', description: 'International English Language Testing System' },
-  { value: 'cambridge_cae', label: 'Cambridge CAE', min: 0, max: 210, placeholder: '180', description: 'Cambridge Advanced English (Grade A/B/C)' },
-  { value: 'cambridge_cpe', label: 'Cambridge CPE', min: 0, max: 230, placeholder: '200', description: 'Cambridge Proficiency English (Grade A/B/C)' },
-  { value: 'pte', label: 'PTE Academic', min: 0, max: 90, placeholder: '71', description: 'Pearson Test of English Academic' },
-  { value: 'duolingo', label: 'Duolingo English Test', min: 0, max: 160, placeholder: '120', description: 'Duolingo English Test' },
-  { value: 'toeic', label: 'TOEIC', min: 0, max: 990, placeholder: '850', description: 'Test of English for International Communication' },
-  { value: 'yds', label: 'YDS / eYDS', min: 0, max: 100, placeholder: '70', description: 'Yabancı Dil Bilgisi Seviye Tespit Sınavı' },
-  { value: 'yokdil', label: 'YÖKDİL / e-YÖKDİL', min: 0, max: 100, placeholder: '70', description: 'Yükseköğretim Kurumları Yabancı Dil Sınavı' }
+// Dil seçenekleri
+const languages = [
+  { value: 'english', label: 'İngilizce' },
+  { value: 'german', label: 'Almanca' },
+  { value: 'french', label: 'Fransızca' },
+  { value: 'spanish', label: 'İspanyolca' },
+  { value: 'italian', label: 'İtalyanca' },
+  { value: 'other', label: 'Diğer' }
 ]
+
+// Ülkeye ve dile göre sınavlar
+const languageTestsByCountry = {
+  'turkey': {
+    'english': [
+      { value: 'toefl', label: 'TOEFL iBT', min: 0, max: 120, placeholder: '100', description: 'Test of English as a Foreign Language' },
+      { value: 'ielts', label: 'IELTS Academic', min: 0, max: 9, step: 0.5, placeholder: '7.0', description: 'International English Language Testing System' },
+      { value: 'yds', label: 'YDS / eYDS', min: 0, max: 100, placeholder: '70', description: 'Yabancı Dil Bilgisi Seviye Tespit Sınavı' },
+      { value: 'yokdil', label: 'YÖKDİL / e-YÖKDİL', min: 0, max: 100, placeholder: '70', description: 'Yükseköğretim Kurumları Yabancı Dil Sınavı' },
+      { value: 'pte', label: 'PTE Academic', min: 0, max: 90, placeholder: '71', description: 'Pearson Test of English Academic' },
+      { value: 'cambridge_cae', label: 'Cambridge CAE', min: 0, max: 210, placeholder: '180', description: 'Cambridge Advanced English (Grade A/B/C)' },
+      { value: 'cambridge_cpe', label: 'Cambridge CPE', min: 0, max: 230, placeholder: '200', description: 'Cambridge Proficiency English (Grade A/B/C)' }
+    ],
+    'german': [
+      { value: 'testdaf', label: 'TestDaF', min: 0, max: 5, step: 0.5, placeholder: '4.0', description: 'Test Deutsch als Fremdsprache' },
+      { value: 'goethe', label: 'Goethe-Zertifikat', min: 0, max: 100, placeholder: '80', description: 'Goethe-Institut Sertifikası (B2/C1/C2)' },
+      { value: 'dsh', label: 'DSH', min: 0, max: 3, step: 0.5, placeholder: '2', description: 'Deutsche Sprachprüfung für den Hochschulzugang' }
+    ],
+    'french': [
+      { value: 'delf', label: 'DELF', min: 0, max: 100, placeholder: '75', description: 'Diplôme d\'Études en Langue Française' },
+      { value: 'dalf', label: 'DALF', min: 0, max: 100, placeholder: '75', description: 'Diplôme Approfondi de Langue Française' },
+      { value: 'tcf', label: 'TCF', min: 0, max: 699, placeholder: '500', description: 'Test de Connaissance du Français' }
+    ]
+  },
+  'usa': {
+    'english': [
+      { value: 'toefl', label: 'TOEFL iBT', min: 0, max: 120, placeholder: '100', description: 'Test of English as a Foreign Language' },
+      { value: 'ielts', label: 'IELTS Academic', min: 0, max: 9, step: 0.5, placeholder: '7.0', description: 'International English Language Testing System' },
+      { value: 'duolingo', label: 'Duolingo English Test', min: 0, max: 160, placeholder: '120', description: 'Duolingo English Test' },
+      { value: 'pte', label: 'PTE Academic', min: 0, max: 90, placeholder: '71', description: 'Pearson Test of English Academic' },
+      { value: 'cambridge_cae', label: 'Cambridge CAE', min: 0, max: 210, placeholder: '180', description: 'Cambridge Advanced English' },
+      { value: 'cambridge_cpe', label: 'Cambridge CPE', min: 0, max: 230, placeholder: '200', description: 'Cambridge Proficiency English' }
+    ]
+  },
+  'uk': {
+    'english': [
+      { value: 'ielts', label: 'IELTS Academic', min: 0, max: 9, step: 0.5, placeholder: '7.0', description: 'International English Language Testing System' },
+      { value: 'cambridge_cae', label: 'Cambridge CAE', min: 0, max: 210, placeholder: '180', description: 'Cambridge Advanced English (Grade A/B/C)' },
+      { value: 'cambridge_cpe', label: 'Cambridge CPE', min: 0, max: 230, placeholder: '200', description: 'Cambridge Proficiency English (Grade A/B/C)' },
+      { value: 'toefl', label: 'TOEFL iBT', min: 0, max: 120, placeholder: '100', description: 'Test of English as a Foreign Language' },
+      { value: 'pte', label: 'PTE Academic', min: 0, max: 90, placeholder: '71', description: 'Pearson Test of English Academic' }
+    ]
+  },
+  'germany': {
+    'german': [
+      { value: 'testdaf', label: 'TestDaF', min: 0, max: 5, step: 0.5, placeholder: '4.0', description: 'Test Deutsch als Fremdsprache' },
+      { value: 'dsh', label: 'DSH', min: 0, max: 3, step: 0.5, placeholder: '2', description: 'Deutsche Sprachprüfung für den Hochschulzugang' },
+      { value: 'goethe', label: 'Goethe-Zertifikat', min: 0, max: 100, placeholder: '80', description: 'Goethe-Institut Sertifikası (B2/C1/C2)' }
+    ],
+    'english': [
+      { value: 'toefl', label: 'TOEFL iBT', min: 0, max: 120, placeholder: '100', description: 'Test of English as a Foreign Language' },
+      { value: 'ielts', label: 'IELTS Academic', min: 0, max: 9, step: 0.5, placeholder: '7.0', description: 'International English Language Testing System' },
+      { value: 'cambridge_cae', label: 'Cambridge CAE', min: 0, max: 210, placeholder: '180', description: 'Cambridge Advanced English' }
+    ]
+  },
+  'france': {
+    'french': [
+      { value: 'dalf', label: 'DALF', min: 0, max: 100, placeholder: '75', description: 'Diplôme Approfondi de Langue Française' },
+      { value: 'delf', label: 'DELF', min: 0, max: 100, placeholder: '75', description: 'Diplôme d\'Études en Langue Française' },
+      { value: 'tcf', label: 'TCF', min: 0, max: 699, placeholder: '500', description: 'Test de Connaissance du Français' }
+    ],
+    'english': [
+      { value: 'toefl', label: 'TOEFL iBT', min: 0, max: 120, placeholder: '100', description: 'Test of English as a Foreign Language' },
+      { value: 'ielts', label: 'IELTS Academic', min: 0, max: 9, step: 0.5, placeholder: '7.0', description: 'International English Language Testing System' }
+    ]
+  },
+  'other': {
+    'english': [
+      { value: 'toefl', label: 'TOEFL iBT', min: 0, max: 120, placeholder: '100', description: 'Test of English as a Foreign Language' },
+      { value: 'ielts', label: 'IELTS Academic', min: 0, max: 9, step: 0.5, placeholder: '7.0', description: 'International English Language Testing System' },
+      { value: 'cambridge_cae', label: 'Cambridge CAE', min: 0, max: 210, placeholder: '180', description: 'Cambridge Advanced English' },
+      { value: 'cambridge_cpe', label: 'Cambridge CPE', min: 0, max: 230, placeholder: '200', description: 'Cambridge Proficiency English' },
+      { value: 'pte', label: 'PTE Academic', min: 0, max: 90, placeholder: '71', description: 'Pearson Test of English Academic' },
+      { value: 'duolingo', label: 'Duolingo English Test', min: 0, max: 160, placeholder: '120', description: 'Duolingo English Test' }
+    ]
+  }
+}
 
 // Background isimlerini formatla (Title Case)
 function formatBackgroundName(name) {
@@ -115,9 +190,9 @@ function InputForm({ onSubmit, loading }) {
     otherConfirmed: false,
     country: 'turkey',
     gradingSystem: '4.0',
+    language: '',
     languageTestType: '',
     languageTestScore: '',
-    entranceExamRank: '',
     undergraduateUniversityRanking: '',
     greScore: '',
     gmatScore: '',

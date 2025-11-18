@@ -253,6 +253,21 @@ def normalize_language_score(test_type, score):
     elif test_type == 'yds' or test_type == 'yokdil':
         # YDS/YÖKDİL: 0-100 -> direkt
         return score
+    elif test_type == 'testdaf':
+        # TestDaF: 0-5 -> 0-100 (3.0 = 60, 4.0 = 80, 5.0 = 100)
+        return (score / 5.0) * 100
+    elif test_type == 'goethe':
+        # Goethe: 0-100 -> direkt
+        return score
+    elif test_type == 'dsh':
+        # DSH: 0-3 -> 0-100 (DSH-1 = 33, DSH-2 = 67, DSH-3 = 100)
+        return (score / 3.0) * 100
+    elif test_type == 'delf' or test_type == 'dalf':
+        # DELF/DALF: 0-100 -> direkt
+        return score
+    elif test_type == 'tcf':
+        # TCF: 0-699 -> 0-100
+        return (score / 699.0) * 100
     else:
         return 0
 
@@ -287,30 +302,7 @@ def convert_gpa_to_4_0(gpa, grading_system):
         # Diğer sistemler için varsayılan olarak 100'lük sistem kabul et
         return (float(gpa) / 100.0) * 4.0
 
-def calculate_entrance_exam_bonus(user_data):
-    """
-    Giriş sınavı bazlı ek puan hesaplar (Türkiye ÖSYM sistemi)
-    """
-    entrance_exam_rank = user_data.get('entrance_exam_rank')
-    country = user_data.get('country', '')
-    
-    if country == 'turkey' and entrance_exam_rank:
-        rank = int(entrance_exam_rank)
-        if rank <= 10000:
-            return 0.0  # Zaten yüksek, ek puan gerekmez
-        elif rank <= 20000:
-            return 0.0
-        elif rank <= 30000:
-            return 0.0
-        elif rank <= 40000:
-            return 0.0
-        elif rank <= 50000:
-            return 0.0
-        else:
-            # 50.000'den büyükse: (20.000 / Sıralama) ek puan
-            return min(0.4, 20000.0 / rank)
-    
-    return 0.0
+# ÖSYM sıralaması kaldırıldı - artık kullanılmıyor
 
 def calculate_bonus_points(user_data):
     """
@@ -382,39 +374,24 @@ def calculate_bonus_points(user_data):
 
 def calculate_minimum_gpa_requirement(user_data):
     """
-    Ülke ve giriş sınavı bazlı minimum GPA gereksinimini hesaplar (4.0 sisteminde)
+    Ülke bazlı minimum GPA gereksinimini hesaplar (4.0 sisteminde)
     """
     gpa = user_data.get('gpa', 0)
     grading_system = user_data.get('grading_system', '4.0')
     country = user_data.get('country', 'turkey')
-    entrance_exam_rank = user_data.get('entrance_exam_rank')
     
     # GPA'yi 4.0 sistemine dönüştür
     gpa_4_0 = convert_gpa_to_4_0(gpa, grading_system)
     
-    # Türkiye için ÖSYM sistemi
-    if country == 'turkey' and entrance_exam_rank:
-        rank = int(entrance_exam_rank)
-        entrance_bonus = calculate_entrance_exam_bonus(user_data)
-        bonus_points = calculate_bonus_points(user_data)
-        
-        if rank <= 10000:
-            return 2.60 - bonus_points - entrance_bonus
-        elif rank <= 20000:
-            return 2.70 - bonus_points - entrance_bonus
-        elif rank <= 30000:
-            return 2.80 - bonus_points - entrance_bonus
-        elif rank <= 40000:
-            return 2.90 - bonus_points - entrance_bonus
-        elif rank <= 50000:
-            return 3.00 - bonus_points - entrance_bonus
-        else:
-            # 50.000'den büyükse: (20.000 / Sıralama) + GPA + Ek Puan ≥ 3.40
-            required = 3.40 - (20000.0 / rank) - bonus_points - entrance_bonus
-            return max(2.50, required)
+    # Bonus puanları hesapla
+    bonus_points = calculate_bonus_points(user_data)
+    
+    # Türkiye için standart minimum (ÖSYM sıralaması kaldırıldı)
+    if country == 'turkey':
+        return 2.50 - bonus_points
     
     # Diğer ülkeler için standart minimum
-    return 2.50
+    return 2.50 - bonus_points
 
 def calculate_match_score(user_data, university):
     """

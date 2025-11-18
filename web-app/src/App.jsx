@@ -55,6 +55,7 @@ function App() {
             body: JSON.stringify({
               gpa: parseFloat(formData.gpa),
               grading_system: formData.gradingSystem,
+              language: formData.language,
               language_test_type: formData.languageTestType,
               language_test_score: formData.languageTestScore ? parseFloat(formData.languageTestScore) : null,
               background: formData.background,
@@ -63,7 +64,6 @@ function App() {
               publications: parseInt(formData.publications) || 0,
               recommendation_letters: parseInt(formData.recommendationLetters) || 0,
               country: formData.country,
-              entrance_exam_rank: formData.entranceExamRank ? parseInt(formData.entranceExamRank) : null,
               undergraduate_university_ranking: formData.undergraduateUniversityRanking,
               gre_score: formData.greScore ? parseInt(formData.greScore) : null,
               gmat_score: formData.gmatScore ? parseInt(formData.gmatScore) : null,
