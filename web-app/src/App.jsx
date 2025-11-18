@@ -119,6 +119,8 @@ function App() {
   }
 
   const handleCVUpload = async (file, extractedData = {}) => {
+    console.log('📋 handleCVUpload çağrıldı:', { file: file?.name, extractedData })
+    
     // Backend'den gelen verileri kullan veya fallback
     const cvData = {
       gpa: extractedData.gpa ? parseFloat(extractedData.gpa).toFixed(2) : '',
@@ -141,8 +143,9 @@ function App() {
       mastersUniversityRanking: ''
     }
 
+    console.log('📊 CV Data hazırlandı:', cvData)
+
     setCvData(cvData)
-    setShowCVUpload(false)
     
     // Eksik bilgiler varsa kullanıcıya göster ve formu doldur
     const missingFields = []
@@ -150,24 +153,26 @@ function App() {
     if (!cvData.languageTestScore) missingFields.push('Dil Skoru')
     if (cvData.background.length === 0) missingFields.push('Background')
     
+    console.log('⚠️ Eksik alanlar:', missingFields)
+    
     // Eksik bilgiler varsa formu göster ve çıkarılan verileri doldur
     if (missingFields.length > 0) {
-      const confirmMessage = `CV'nizden bazı bilgiler çıkarılamadı:\n${missingFields.join(', ')}\n\nÇıkarılan bilgilerle formu açmak ister misiniz?`
-      if (window.confirm(confirmMessage)) {
-        setShowForm(true)
-        // Form component'ine verileri geç (InputForm'da pre-fill yapılacak)
-        return
-      } else {
-        setShowCVUpload(true)
-        setUploadedFile(null)
-        return
-      }
+      console.log('📝 Eksik bilgiler var, form açılıyor...')
+      setShowCVUpload(false)
+      setShowForm(true)
+      // Form component'ine verileri geç (InputForm'da pre-fill yapılacak)
+      return
     }
+    
+    // Tüm bilgiler mevcut - otomatik analiz yap
+    console.log('✅ Tüm bilgiler mevcut, analiz başlatılıyor...')
+    setShowCVUpload(false)
     
     // Otomatik analiz ve sonuçları göster
     setTimeout(() => {
+      console.log('🚀 handleSubmit çağrılıyor...')
       handleSubmit(cvData)
-    }, 1000)
+    }, 500)
   }
 
   const handleManualEntry = () => {

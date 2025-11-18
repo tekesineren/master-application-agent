@@ -46,10 +46,12 @@ function CVUpload({ onCVUpload, onManualEntry }) {
 
   const handleFile = async (file) => {
     setError(null)
+    console.log('📄 CV yükleme başladı:', file.name, file.type, file.size)
     
     // 1. Dosya validasyonu
     const validation = validateCVFile(file)
     if (!validation.valid) {
+      console.error('❌ Dosya validasyonu başarısız:', validation.error)
       setError(validation.error)
       return
     }
@@ -62,21 +64,37 @@ function CVUpload({ onCVUpload, onManualEntry }) {
       const formData = new FormData()
       formData.append('cv', file)
       
-      const apiUrl = import.meta.env.VITE_API_URL || 
-        (import.meta.env.DEV ? '/api' : 'https://master-application-agent-production.up.railway.app/api')
+      // API URL'i belirle
+      let apiUrl = import.meta.env.VITE_API_URL
+      if (!apiUrl) {
+        if (import.meta.env.DEV) {
+          apiUrl = 'http://localhost:5000/api'
+        } else {
+          apiUrl = 'https://master-application-agent-production.up.railway.app/api'
+        }
+      }
+      
+      console.log('🌐 API URL:', apiUrl)
+      console.log('📤 Backend\'e gönderiliyor...')
       
       const response = await fetch(`${apiUrl}/parse-cv`, {
         method: 'POST',
         body: formData
       })
       
+      console.log('📥 Response status:', response.status, response.statusText)
+      
       if (!response.ok) {
-        throw new Error('CV analiz edilemedi')
+        const errorText = await response.text()
+        console.error('❌ Response error:', errorText)
+        throw new Error(`CV analiz edilemedi (${response.status}). Backend çalışıyor mu?`)
       }
       
       const data = await response.json()
+      console.log('✅ Backend response:', data)
       
       if (!data.success) {
+        console.error('❌ Backend success=false:', data.error)
         throw new Error(data.error || 'CV içeriği analiz edilemedi')
       }
       
@@ -84,21 +102,38 @@ function CVUpload({ onCVUpload, onManualEntry }) {
       if (data.extracted_text) {
         const contentValidation = validateCVContent(data.extracted_text)
         if (!contentValidation.valid) {
+          console.warn('⚠️ CV içerik validasyonu başarısız:', contentValidation.error)
           setError(contentValidation.error)
-          setUploadedFile(null)
           setIsProcessing(false)
+          // Dosyayı silme, kullanıcı manuel giriş yapabilir
           return
         }
       }
       
+      console.log('✅ CV başarıyla parse edildi:', data.extracted_data)
+      
       // 4. Başarılı - CV verilerini gönder
+      setIsProcessing(false)
       onCVUpload(file, data.extracted_data || {})
       
     } catch (err) {
-      console.error('CV parsing error:', err)
-      setError(err.message || 'CV analiz edilirken bir hata oluştu. Lütfen manuel giriş yapın.')
-      setUploadedFile(null)
+      console.error('❌ CV parsing error:', err)
+      console.error('Error details:', {
+        message: err.message,
+        stack: err.stack,
+        name: err.name
+      })
+      
+      // Daha detaylı hata mesajı
+      let errorMessage = err.message || 'CV analiz edilirken bir hata oluştu.'
+      
+      if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
+        errorMessage = 'Backend\'e bağlanılamadı. Backend çalışıyor mu? (http://localhost:5000)'
+      }
+      
+      setError(errorMessage + ' Lütfen manuel giriş yapın veya tekrar deneyin.')
       setIsProcessing(false)
+      // Dosyayı silme, kullanıcı tekrar deneyebilir
     }
   }
 

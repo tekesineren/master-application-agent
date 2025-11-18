@@ -772,27 +772,41 @@ def parse_cv_content(text):
     
     return extracted_data
 
-@app.route('/api/parse-cv', methods=['POST'])
+@app.route('/api/parse-cv', methods=['POST', 'OPTIONS'])
 def parse_cv():
     """CV dosyasını parse et ve bilgileri çıkar"""
+    if request.method == 'OPTIONS':
+        return '', 200
+    
     try:
+        print("📥 CV parse isteği alındı")
+        print(f"Request files: {list(request.files.keys())}")
+        print(f"Content-Type: {request.content_type}")
+        
         if 'cv' not in request.files:
+            print("❌ 'cv' key bulunamadı")
             return jsonify({
                 "success": False,
                 "error": "CV dosyası bulunamadı"
             }), 400
         
         file = request.files['cv']
+        print(f"📄 Dosya alındı: {file.filename}, type: {file.content_type}, size: {len(file.read())}")
         
-        if file.filename == '':
+        # Dosyayı tekrar oku (read() dosyayı tüketir)
+        file.seek(0)
+        file_content = file.read()
+        
+        if file.filename == '' or len(file_content) == 0:
+            print("❌ Dosya boş")
             return jsonify({
                 "success": False,
-                "error": "Dosya seçilmedi"
+                "error": "Dosya seçilmedi veya boş"
             }), 400
         
         # Dosya tipi kontrolü
         file_type = file.content_type
-        file_content = file.read()
+        print(f"📋 Dosya tipi: {file_type}")
         
         # Text extraction
         text = None
@@ -835,7 +849,9 @@ def parse_cv():
             }), 400
         
         # Bilgileri çıkar
+        print("🔍 CV içeriği parse ediliyor...")
         extracted_data = parse_cv_content(text)
+        print(f"✅ Parse edilen veriler: {extracted_data}")
         
         return jsonify({
             "success": True,
@@ -845,7 +861,9 @@ def parse_cv():
         })
         
     except Exception as e:
-        print(f"CV parsing error: {e}")
+        import traceback
+        print(f"❌ CV parsing error: {e}")
+        print(f"Traceback: {traceback.format_exc()}")
         return jsonify({
             "success": False,
             "error": f"CV analiz edilirken hata oluştu: {str(e)}"
