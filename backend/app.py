@@ -489,39 +489,6 @@ def calculate_match_score(user_data, university):
             score += 5
     else:
         score += 0  # Dil sınavı yoksa puan yok
-
-def normalize_language_score(test_type, score):
-    """
-    Farklı dil sınavlarını 0-100 arası normalize eder
-    """
-    score = float(score)
-    
-    if test_type == 'toefl':
-        # TOEFL iBT: 0-120 -> 0-100
-        return (score / 120.0) * 100
-    elif test_type == 'ielts':
-        # IELTS: 0-9 -> 0-100
-        return (score / 9.0) * 100
-    elif test_type == 'cambridge_cae':
-        # Cambridge CAE: 0-210 -> 0-100 (Grade A: 200-210, B: 193-199, C: 180-192)
-        return (score / 210.0) * 100
-    elif test_type == 'cambridge_cpe':
-        # Cambridge CPE: 0-230 -> 0-100 (Grade A: 220-230, B: 213-219, C: 200-212)
-        return (score / 230.0) * 100
-    elif test_type == 'pte':
-        # PTE Academic: 0-90 -> 0-100
-        return (score / 90.0) * 100
-    elif test_type == 'duolingo':
-        # Duolingo: 0-160 -> 0-100
-        return (score / 160.0) * 100
-    elif test_type == 'toeic':
-        # TOEIC: 0-990 -> 0-100
-        return (score / 990.0) * 100
-    elif test_type == 'yds' or test_type == 'yokdil':
-        # YDS/YÖKDİL: 0-100 -> direkt
-        return score
-    else:
-        return 0
     
     # 3. Background eşleşmesi (15 puan)
     user_background = user_data.get('background', [])
