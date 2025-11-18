@@ -167,22 +167,88 @@
 }
 
 @media (max-width: 768px) {
+  .results-container {
+    padding: 10px;
+  }
+  
   .results-header {
     flex-direction: column;
     gap: 15px;
     text-align: center;
-    padding-top: 60px;
+    padding: 20px 15px;
+    position: relative;
+  }
+  
+  .results-header h1 {
+    font-size: 1.5rem;
+    order: 2;
   }
   
   .back-button-results {
-    position: static;
+    position: absolute;
+    left: 15px;
+    top: 20px;
     transform: none;
-    align-self: flex-start;
-    margin-bottom: 10px;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+  
+  .reset-button {
+    order: 3;
+    width: 100%;
+    max-width: 200px;
+  }
+  
+  .results-section {
+    padding: 20px 15px;
+    margin-bottom: 20px;
+  }
+  
+  .section-header h2 {
+    font-size: 1.5rem;
   }
   
   .universities-grid {
     grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .university-card {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .results-container {
+    padding: 5px;
+  }
+  
+  .results-header {
+    padding: 15px 10px;
+    padding-top: 50px;
+  }
+  
+  .results-header h1 {
+    font-size: 1.3rem;
+  }
+  
+  .back-button-results {
+    left: 10px;
+    top: 15px;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+  
+  .results-section {
+    padding: 15px 10px;
+  }
+  
+  .section-header h2 {
+    font-size: 1.3rem;
+  }
+  
+  .card-header h3 {
+    font-size: 1.1rem;
   }
 }
 

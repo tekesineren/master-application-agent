@@ -16,8 +16,11 @@ function InputForm({ onSubmit, loading }) {
   const [formData, setFormData] = useState({
     gpa: '',
     languageScore: '',
-    motivationLetter: '',
-    background: []
+    background: [],
+    researchExperience: '',
+    workExperience: '',
+    publications: '',
+    recommendationLetters: '0'
   })
 
   const handleChange = (e) => {
@@ -40,8 +43,8 @@ function InputForm({ onSubmit, loading }) {
   const handleSubmit = (e) => {
     e.preventDefault()
     
-    if (!formData.gpa || !formData.languageScore || !formData.motivationLetter || formData.background.length === 0) {
-      alert('Lütfen tüm alanları doldurun')
+    if (!formData.gpa || !formData.languageScore || formData.background.length === 0) {
+      alert('Lütfen tüm zorunlu alanları doldurun')
       return
     }
 
@@ -108,17 +111,78 @@ function InputForm({ onSubmit, loading }) {
         </div>
 
         <div className="form-section">
-          <h2>✍️ Motivation Letter</h2>
-          <textarea
-            name="motivationLetter"
-            value={formData.motivationLetter}
-            onChange={handleChange}
-            placeholder="Motivation letter'ınızı buraya yazın... (En az 200 kelime önerilir)"
-            rows="10"
-            required
-          />
-          <div className="word-count">
-            Kelime sayısı: {formData.motivationLetter.split(/\s+/).filter(w => w.length > 0).length}
+          <h2>🔬 Araştırma Deneyimi</h2>
+          <div className="form-group">
+            <label htmlFor="researchExperience">Araştırma Deneyimi (Yıl)</label>
+            <input
+              type="number"
+              id="researchExperience"
+              name="researchExperience"
+              value={formData.researchExperience}
+              onChange={handleChange}
+              min="0"
+              max="10"
+              step="0.5"
+              placeholder="0"
+            />
+            <small>Örn: 1.5 yıl araştırma asistanlığı</small>
+          </div>
+        </div>
+
+        <div className="form-section">
+          <h2>💼 İş Deneyimi</h2>
+          <div className="form-group">
+            <label htmlFor="workExperience">İş Deneyimi (Yıl)</label>
+            <input
+              type="number"
+              id="workExperience"
+              name="workExperience"
+              value={formData.workExperience}
+              onChange={handleChange}
+              min="0"
+              max="20"
+              step="0.5"
+              placeholder="0"
+            />
+            <small>İlgili alanda çalışma deneyimi</small>
+          </div>
+        </div>
+
+        <div className="form-section">
+          <h2>📄 Yayınlar</h2>
+          <div className="form-group">
+            <label htmlFor="publications">Yayın Sayısı</label>
+            <input
+              type="number"
+              id="publications"
+              name="publications"
+              value={formData.publications}
+              onChange={handleChange}
+              min="0"
+              max="50"
+              placeholder="0"
+            />
+            <small>Hakemli dergilerde yayınlanmış makale sayısı</small>
+          </div>
+        </div>
+
+        <div className="form-section">
+          <h2>📝 Referans Mektupları</h2>
+          <div className="form-group">
+            <label htmlFor="recommendationLetters">Referans Mektubu Sayısı</label>
+            <select
+              id="recommendationLetters"
+              name="recommendationLetters"
+              value={formData.recommendationLetters}
+              onChange={handleChange}
+            >
+              <option value="0">0</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4+</option>
+            </select>
+            <small>Hazır olan referans mektubu sayısı</small>
           </div>
         </div>
 

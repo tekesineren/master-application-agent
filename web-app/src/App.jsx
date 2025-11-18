@@ -55,8 +55,11 @@ function App() {
             body: JSON.stringify({
               gpa: parseFloat(formData.gpa),
               language_score: parseInt(formData.languageScore),
-              motivation_letter: formData.motivationLetter,
-              background: formData.background
+              background: formData.background,
+              research_experience: parseFloat(formData.researchExperience) || 0,
+              work_experience: parseFloat(formData.workExperience) || 0,
+              publications: parseInt(formData.publications) || 0,
+              recommendation_letters: parseInt(formData.recommendationLetters) || 0
             }),
             signal: controller.signal
           })

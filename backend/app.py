@@ -228,55 +228,85 @@ def calculate_match_score(user_data, university):
     Kullanıcı verilerine göre okul eşleşme skorunu hesaplar
     
     Parametreler:
-    - Dil skoru (language_score): 0-120 arası
-    - GPA: 0-4.0 arası
-    - Motivation letter: metin analizi (basit versiyonda kelime sayısı ve içerik kontrolü)
-    - Background: ilgili alanlar listesi
+    - GPA: 0-4.0 arası (25 puan)
+    - Dil skoru (language_score): 0-120 arası (20 puan)
+    - Background: ilgili alanlar listesi (20 puan)
+    - Research experience: Araştırma deneyimi yıl (15 puan)
+    - Work experience: İş deneyimi yıl (10 puan)
+    - Publications: Yayın sayısı (5 puan)
+    - Recommendation letters: Referans mektubu sayısı (5 puan)
     """
     score = 0
     max_score = 100
     
-    # 1. GPA değerlendirmesi (30 puan)
+    # 1. GPA değerlendirmesi (25 puan)
     gpa = user_data.get('gpa', 0)
     if gpa >= university['min_gpa']:
-        gpa_score = min(30, (gpa / 4.0) * 30)
+        gpa_score = min(25, (gpa / 4.0) * 25)
         score += gpa_score
     else:
         # Minimum GPA'nin altındaysa düşük puan
-        score += (gpa / university['min_gpa']) * 15
+        score += (gpa / university['min_gpa']) * 12
     
-    # 2. Dil skoru değerlendirmesi (25 puan)
+    # 2. Dil skoru değerlendirmesi (20 puan)
     language_score = user_data.get('language_score', 0)
     if language_score >= university['min_language_score']:
-        lang_score = min(25, (language_score / 120) * 25)
+        lang_score = min(20, (language_score / 120) * 20)
         score += lang_score
     else:
-        score += (language_score / university['min_language_score']) * 12
+        score += (language_score / university['min_language_score']) * 10
     
-    # 3. Background eşleşmesi (25 puan)
+    # 3. Background eşleşmesi (20 puan)
     user_background = user_data.get('background', [])
     required_background = university.get('required_background', [])
     
     # Ortak alanları bul
     common_fields = set(user_background) & set(required_background)
     if common_fields:
-        background_score = (len(common_fields) / len(required_background)) * 25
-        score += min(25, background_score)
+        background_score = (len(common_fields) / len(required_background)) * 20
+        score += min(20, background_score)
     
-    # 4. Motivation letter değerlendirmesi (20 puan)
-    # Basit versiyon: kelime sayısı ve temel kontroller
-    motivation_letter = user_data.get('motivation_letter', '')
-    word_count = len(motivation_letter.split())
-    
-    # İdeal kelime sayısı: 500-800 arası
-    if 500 <= word_count <= 800:
-        score += 20
-    elif 300 <= word_count < 500 or 800 < word_count <= 1000:
+    # 4. Araştırma deneyimi (15 puan)
+    research_exp = user_data.get('research_experience', 0)
+    # 2+ yıl araştırma deneyimi = tam puan
+    if research_exp >= 2:
         score += 15
-    elif word_count >= 200:
+    elif research_exp >= 1:
         score += 10
-    else:
+    elif research_exp >= 0.5:
         score += 5
+    # 0 yıl = 0 puan
+    
+    # 5. İş deneyimi (10 puan)
+    work_exp = user_data.get('work_experience', 0)
+    # 3+ yıl iş deneyimi = tam puan
+    if work_exp >= 3:
+        score += 10
+    elif work_exp >= 2:
+        score += 7
+    elif work_exp >= 1:
+        score += 4
+    # 0 yıl = 0 puan
+    
+    # 6. Yayınlar (5 puan)
+    publications = user_data.get('publications', 0)
+    if publications >= 5:
+        score += 5
+    elif publications >= 3:
+        score += 3
+    elif publications >= 1:
+        score += 2
+    # 0 yayın = 0 puan
+    
+    # 7. Referans mektupları (5 puan)
+    rec_letters = user_data.get('recommendation_letters', 0)
+    if rec_letters >= 3:
+        score += 5
+    elif rec_letters >= 2:
+        score += 3
+    elif rec_letters >= 1:
+        score += 2
+    # 0 mektup = 0 puan
     
     return round(score, 2)
 

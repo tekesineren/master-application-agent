@@ -56,12 +56,47 @@
 }
 
 @media (max-width: 768px) {
+  .form-page {
+    padding: 15px 10px;
+  }
+  
+  .back-button {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+  }
+  
+  .app-header {
+    padding: 15px;
+    margin-bottom: 20px;
+  }
+  
   .app-header h1 {
     font-size: 2rem;
   }
   
   .app-header p {
     font-size: 1rem;
+  }
+  
+  .error-message {
+    padding: 12px;
+    font-size: 0.9rem;
+    margin: 15px auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-page {
+    padding: 10px 5px;
+  }
+  
+  .app-header h1 {
+    font-size: 1.6rem;
+  }
+  
+  .app-header p {
+    font-size: 0.9rem;
   }
 }
 

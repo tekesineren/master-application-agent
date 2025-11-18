@@ -40,9 +40,29 @@
   transition: border-color 0.3s;
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-group select:focus {
   outline: none;
   border-color: #667eea;
+}
+
+.form-group select {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  background: white;
+  cursor: pointer;
+  transition: border-color 0.3s;
+}
+
+.form-group small {
+  display: block;
+  margin-top: 6px;
+  color: #666;
+  font-size: 0.85rem;
+  font-style: italic;
 }
 
 .background-grid {
@@ -125,12 +145,60 @@ textarea:focus {
 }
 
 @media (max-width: 768px) {
+  .form-container {
+    padding: 10px;
+  }
+  
   .input-form {
-    padding: 20px;
+    padding: 20px 15px;
+    border-radius: 12px;
+  }
+  
+  .form-section {
+    margin-bottom: 25px;
+  }
+  
+  .form-section h2 {
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+  }
+  
+  .form-group {
+    margin-bottom: 18px;
+  }
+  
+  .form-group input,
+  .form-group select {
+    padding: 14px;
+    font-size: 16px; /* iOS zoom önleme */
   }
   
   .background-grid {
     grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .checkbox-label {
+    padding: 14px;
+  }
+  
+  .submit-button {
+    padding: 18px;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-container {
+    padding: 5px;
+  }
+  
+  .input-form {
+    padding: 15px 10px;
+  }
+  
+  .form-section h2 {
+    font-size: 1.2rem;
   }
 }
 
