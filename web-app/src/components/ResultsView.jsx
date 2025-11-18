@@ -52,6 +52,9 @@ function ResultsView({ results, onReset }) {
   return (
     <div className="results-container">
       <div className="results-header">
+        <button onClick={onReset} className="back-button-results">
+          ← Geri
+        </button>
         <h1>🎯 Eşleşme Sonuçları</h1>
         <button onClick={onReset} className="reset-button">
           🔄 Yeni Analiz
