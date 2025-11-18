@@ -24,21 +24,53 @@ function App() {
       
       console.log('API URL:', apiUrl)
       
-      const response = await fetch(`${apiUrl}/match`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          gpa: parseFloat(formData.gpa),
-          language_score: parseInt(formData.languageScore),
-          motivation_letter: formData.motivationLetter,
-          background: formData.background
-        })
-      })
+      // Retry mekanizması - Backend uyku modundaysa uyandırmak için
+      let response
+      let lastError
+      const maxRetries = 3
+      const retryDelay = 5000 // 5 saniye
+      
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          // İlk denemede backend'i uyandırmak için health check yap
+          if (attempt === 1) {
+            await fetch(`${apiUrl.replace('/match', '/health')}`, {
+              method: 'GET',
+              timeout: 30000
+            }).catch(() => {}) // Health check hatası önemsiz
+          }
+          
+          // Ana istek
+          response = await fetch(`${apiUrl}/match`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              gpa: parseFloat(formData.gpa),
+              language_score: parseInt(formData.languageScore),
+              motivation_letter: formData.motivationLetter,
+              background: formData.background
+            }),
+            signal: AbortSignal.timeout(60000) // 60 saniye timeout
+          })
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
+          if (response.ok) {
+            break // Başarılı, retry döngüsünden çık
+          } else {
+            throw new Error(`HTTP error! status: ${response.status}`)
+          }
+        } catch (err) {
+          lastError = err
+          if (attempt < maxRetries) {
+            console.log(`Deneme ${attempt}/${maxRetries} başarısız, ${retryDelay/1000} saniye sonra tekrar denenecek...`)
+            await new Promise(resolve => setTimeout(resolve, retryDelay))
+          }
+        }
+      }
+
+      if (!response || !response.ok) {
+        throw lastError || new Error('Backend yanıt vermiyor')
       }
 
       const data = await response.json()
@@ -50,7 +82,7 @@ function App() {
       }
     } catch (err) {
       console.error('API Error:', err)
-      setError(`Backend API'ye bağlanılamadı: ${err.message}. Lütfen internet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.`)
+      setError(`Backend API'ye bağlanılamadı. Backend uyku modunda olabilir, lütfen 30-60 saniye bekleyip tekrar deneyin. Hata: ${err.message}`)
     } finally {
       setLoading(false)
     }
