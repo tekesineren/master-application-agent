@@ -87,11 +87,70 @@ function InputForm({ onSubmit, loading }) {
   }
 
   const handleBackgroundToggle = (option) => {
+    if (option === 'other') {
+      // "Other" seçildiğinde sadece toggle yap, input alanı açılacak
+      setFormData(prev => ({
+        ...prev,
+        background: prev.background.includes('other')
+          ? prev.background.filter(b => b !== 'other')
+          : [...prev.background, 'other'],
+        otherConfirmed: false,
+        otherBackground: ''
+      }))
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        background: prev.background.includes(option)
+          ? prev.background.filter(b => b !== option)
+          : [...prev.background, option]
+      }))
+    }
+  }
+
+  const handleOtherInputChange = (e) => {
+    const value = e.target.value
     setFormData(prev => ({
       ...prev,
-      background: prev.background.includes(option)
-        ? prev.background.filter(b => b !== option)
-        : [...prev.background, option]
+      otherBackground: value, // Original case'i koru
+      otherConfirmed: false // Input değiştiğinde confirmation'ı sıfırla
+    }))
+  }
+
+  const handleOtherConfirm = () => {
+    const value = formData.otherBackground.toLowerCase().trim()
+    
+    // Minimum uzunluk kontrolü
+    if (value.length < 3) {
+      alert('Lütfen en az 3 karakter girin')
+      return
+    }
+    
+    // Uygunsuz kelimeler kontrolü
+    const inappropriateWords = ['test', 'deneme', 'asdf', 'qwerty', '123', 'abc', 'xxx', 'lol', 'haha', 'spam']
+    if (inappropriateWords.some(word => value.includes(word))) {
+      alert('Lütfen geçerli bir akademik veya profesyonel alan girin')
+      return
+    }
+    
+    // Whitelist kontrolü
+    const isApproved = approvedOtherFields.some(field => {
+      const fieldLower = field.toLowerCase()
+      return fieldLower.includes(value) || value.includes(fieldLower) || 
+        value.split(' ').some(word => word.length > 2 && fieldLower.includes(word.substring(0, 3)))
+    })
+    
+    if (!isApproved && value.length > 0) {
+      // Whitelist'te yoksa kullanıcıya onay sor
+      const confirmMessage = `"${formData.otherBackground}" whitelist'te yok. Yine de eklemek istiyor musunuz?`
+      if (!window.confirm(confirmMessage)) {
+        return
+      }
+    }
+    
+    setFormData(prev => ({
+      ...prev,
+      otherConfirmed: true,
+      otherBackground: formData.otherBackground // Original case'i koru
     }))
   }
 
