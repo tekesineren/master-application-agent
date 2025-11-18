@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Icon Generator - Master Application Agent</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: #f5f5f5;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .icon-container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .instructions {
+            max-width: 600px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎓 Master Application Agent - Icon Generator</h1>
+    
+    <div class="icon-container">
+        <svg id="icon512" width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <!-- Eflatun gradient arka plan -->
+                <radialGradient id="bgGradient" cx="50%" cy="50%" r="70%">
+                    <stop offset="0%" style="stop-color:#9b59b6;stop-opacity:1" />
+                    <stop offset="50%" style="stop-color:#8e44ad;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#6c3483;stop-opacity:1" />
+                </radialGradient>
+                
+                <!-- Spiral için gradient -->
+                <linearGradient id="spiralGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.9" />
+                    <stop offset="50%" style="stop-color:#e8d5f2;stop-opacity:0.8" />
+                    <stop offset="100%" style="stop-color:#d2b4de;stop-opacity:0.7" />
+                </linearGradient>
+            </defs>
+            
+            <!-- Arka plan -->
+            <rect width="512" height="512" fill="url(#bgGradient)" rx="100"/>
+            
+            <!-- Fibonacci Spiral (Altın Oran Spiral) - Fraktal Yapı -->
+            <!-- Merkez: 256, 256 -->
+            <!-- Fibonacci sayıları: 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233 -->
+            <!-- Altın oran: φ = 1.618 -->
+            
+            <g transform="translate(256, 256)">
+                <!-- Hipnoz efekti için çok katmanlı, büyük, smooth Fibonacci Spiral -->
+                <!-- Smooth bezier curves kullanarak keskin dönüşleri yumuşatıyoruz -->
+                
+                <!-- Ana spiral - En dış katman (hipnoz efekti için büyük) -->
+                <path d="M 0 0 
+                    Q 0.5 0.5 1 1
+                    Q 1.5 1.5 0 2.5
+                    Q -1.5 1.5 -2.5 0
+                    Q -1.5 -1.5 0 -3.5
+                    Q 1.5 -1.5 5.5 0
+                    Q 1.5 1.5 0 9
+                    Q -1.5 1.5 -14 0
+                    Q -1.5 -1.5 0 -22
+                    Q 1.5 -1.5 35 0
+                    Q 1.5 1.5 0 56
+                    Q -1.5 1.5 -90 0
+                    Q -1.5 -1.5 0 -145
+                    Q 1.5 -1.5 234 0
+                    Q 1.5 1.5 0 378
+                    Q -1.5 1.5 -378 0
+                    Q -1.5 -1.5 0 -612" 
+                    fill="none" 
+                    stroke="url(#spiralGradient)" 
+                    stroke-width="12" 
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    transform="scale(0.95)"/>
+                
+                <!-- İkinci katman - Orta spiral (hipnoz derinliği) -->
+                <path d="M 0 0 
+                    Q 0.3 0.3 0.7 0.7
+                    Q 1.0 1.0 0 1.8
+                    Q -1.0 1.0 -1.8 0
+                    Q -1.0 -1.0 0 -2.8
+                    Q 1.0 -1.0 4.2 0
+                    Q 1.0 1.0 0 6.8
+                    Q -1.0 1.0 -10.5 0
+                    Q -1.0 -1.0 0 -16.8
+                    Q 1.0 -1.0 26.5 0
+                    Q 1.0 1.0 0 42.8
+                    Q -1.0 1.0 -68.5 0
+                    Q -1.0 -1.0 0 -110.8
+                    Q 1.0 -1.0 179.5 0
+                    Q 1.0 1.0 0 290.3
+                    Q -1.0 1.0 -290.3 0
+                    Q -1.0 -1.0 0 -470.6" 
+                    fill="none" 
+                    stroke="rgba(255,255,255,0.75)" 
+                    stroke-width="8" 
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    transform="scale(0.95)"/>
+                
+                <!-- Üçüncü katman - İç spiral (hipnoz merkezi) -->
+                <path d="M 0 0 
+                    Q 0.2 0.2 0.5 0.5
+                    Q 0.7 0.7 0 1.3
+                    Q -0.7 0.7 -1.3 0
+                    Q -0.7 -0.7 0 -2.0
+                    Q 0.7 -0.7 3.2 0
+                    Q 0.7 0.7 0 5.2
+                    Q -0.7 0.7 -8.0 0
+                    Q -0.7 -0.7 0 -12.8
+                    Q 0.7 -0.7 20.0 0
+                    Q 0.7 0.7 0 32.8
+                    Q -0.7 0.7 -51.8 0
+                    Q -0.7 -0.7 0 -83.8
+                    Q 0.7 -0.7 135.5 0
+                    Q 0.7 0.7 0 219.3
+                    Q -0.7 0.7 -219.3 0
+                    Q -0.7 -0.7 0 -354.8" 
+                    fill="none" 
+                    stroke="rgba(255,255,255,0.6)" 
+                    stroke-width="6" 
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    transform="scale(0.95)"/>
+                
+                <!-- Dördüncü katman - En iç spiral (hipnoz çekirdeği) -->
+                <path d="M 0 0 
+                    Q 0.15 0.15 0.35 0.35
+                    Q 0.5 0.5 0 0.9
+                    Q -0.5 0.5 -0.9 0
+                    Q -0.5 -0.5 0 -1.4
+                    Q 0.5 -0.5 2.4 0
+                    Q 0.5 0.5 0 3.8
+                    Q -0.5 0.5 -5.8 0
+                    Q -0.5 -0.5 0 -9.4
+                    Q 0.5 -0.5 15.2 0
+                    Q 0.5 0.5 0 24.6
+                    Q -0.5 0.5 -39.8 0
+                    Q -0.5 -0.5 0 -64.4
+                    Q 0.5 -0.5 104.2 0
+                    Q 0.5 0.5 0 168.6
+                    Q -0.5 0.5 -168.6 0
+                    Q -0.5 -0.5 0 -273.2" 
+                    fill="none" 
+                    stroke="rgba(255,255,255,0.5)" 
+                    stroke-width="4" 
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    transform="scale(0.95)"/>
+                
+                <!-- Beşinci katman - En içteki spiral (hipnoz merkez noktası) -->
+                <path d="M 0 0 
+                    Q 0.1 0.1 0.25 0.25
+                    Q 0.35 0.35 0 0.65
+                    Q -0.35 0.35 -0.65 0
+                    Q -0.35 -0.35 0 -1.0
+                    Q 0.35 -0.35 1.7 0
+                    Q 0.35 0.35 0 2.7
+                    Q -0.35 0.35 -4.4 0
+                    Q -0.35 -0.35 0 -7.1
+                    Q 0.35 -0.35 11.5 0
+                    Q 0.35 0.35 0 18.6
+                    Q -0.35 0.35 -30.1 0
+                    Q -0.35 -0.35 0 -48.7
+                    Q 0.35 -0.35 78.8 0
+                    Q 0.35 0.35 0 127.5
+                    Q -0.35 0.35 -127.5 0
+                    Q -0.35 -0.35 0 -206.3" 
+                    fill="none" 
+                    stroke="rgba(255,255,255,0.4)" 
+                    stroke-width="3" 
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    transform="scale(0.95)"/>
+                
+                <!-- Merkez nokta (hipnoz başlangıcı) -->
+                <circle cx="0" cy="0" r="4" fill="rgba(255,255,255,1)"/>
+                <circle cx="0" cy="0" r="2" fill="rgba(255,255,255,0.8)"/>
+            </g>
+        </svg>
+    </div>
+    
+    <div class="icon-container">
+        <svg id="icon192" width="192" height="192" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+            <!-- Aynı fraktal Fibonacci spiral, küçük boyut için -->
+            <defs>
+                <radialGradient id="bgGradient192" cx="50%" cy="50%" r="70%">
+                    <stop offset="0%" style="stop-color:#9b59b6;stop-opacity:1" />
+                    <stop offset="50%" style="stop-color:#8e44ad;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#6c3483;stop-opacity:1" />
+                </radialGradient>
+                <linearGradient id="spiralGradient192" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.9" />
+                    <stop offset="50%" style="stop-color:#e8d5f2;stop-opacity:0.8" />
+                    <stop offset="100%" style="stop-color:#d2b4de;stop-opacity:0.7" />
+                </linearGradient>
+            </defs>
+            
+            <rect width="512" height="512" fill="url(#bgGradient192)" rx="100"/>
+            
+            <g transform="translate(256, 256)">
+                <!-- Aynı smooth hipnoz spiral, küçük boyut için -->
+                <path d="M 0 0 
+                    Q 0.5 0.5 1 1
+                    Q 1.5 1.5 0 2.5
+                    Q -1.5 1.5 -2.5 0
+                    Q -1.5 -1.5 0 -3.5
+                    Q 1.5 -1.5 5.5 0
+                    Q 1.5 1.5 0 9
+                    Q -1.5 1.5 -14 0
+                    Q -1.5 -1.5 0 -22
+                    Q 1.5 -1.5 35 0
+                    Q 1.5 1.5 0 56
+                    Q -1.5 1.5 -90 0
+                    Q -1.5 -1.5 0 -145
+                    Q 1.5 -1.5 234 0
+                    Q 1.5 1.5 0 378
+                    Q -1.5 1.5 -378 0
+                    Q -1.5 -1.5 0 -612" 
+                    fill="none" 
+                    stroke="url(#spiralGradient192)" 
+                    stroke-width="12" 
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    transform="scale(0.95)"/>
+                
+                <path d="M 0 0 
+                    Q 0.3 0.3 0.7 0.7
+                    Q 1.0 1.0 0 1.8
+                    Q -1.0 1.0 -1.8 0
+                    Q -1.0 -1.0 0 -2.8
+                    Q 1.0 -1.0 4.2 0
+                    Q 1.0 1.0 0 6.8
+                    Q -1.0 1.0 -10.5 0
+                    Q -1.0 -1.0 0 -16.8
+                    Q 1.0 -1.0 26.5 0
+                    Q 1.0 1.0 0 42.8
+                    Q -1.0 1.0 -68.5 0
+                    Q -1.0 -1.0 0 -110.8
+                    Q 1.0 -1.0 179.5 0
+                    Q 1.0 1.0 0 290.3
+                    Q -1.0 1.0 -290.3 0
+                    Q -1.0 -1.0 0 -470.6" 
+                    fill="none" 
+                    stroke="rgba(255,255,255,0.75)" 
+                    stroke-width="8" 
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    transform="scale(0.95)"/>
+                
+                <path d="M 0 0 
+                    Q 0.2 0.2 0.5 0.5
+                    Q 0.7 0.7 0 1.3
+                    Q -0.7 0.7 -1.3 0
+                    Q -0.7 -0.7 0 -2.0
+                    Q 0.7 -0.7 3.2 0
+                    Q 0.7 0.7 0 5.2
+                    Q -0.7 0.7 -8.0 0
+                    Q -0.7 -0.7 0 -12.8
+                    Q 0.7 -0.7 20.0 0
+                    Q 0.7 0.7 0 32.8
+                    Q -0.7 0.7 -51.8 0
+                    Q -0.7 -0.7 0 -83.8
+                    Q 0.7 -0.7 135.5 0
+                    Q 0.7 0.7 0 219.3
+                    Q -0.7 0.7 -219.3 0
+                    Q -0.7 -0.7 0 -354.8" 
+                    fill="none" 
+                    stroke="rgba(255,255,255,0.6)" 
+                    stroke-width="6" 
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    transform="scale(0.95)"/>
+                
+                <path d="M 0 0 
+                    Q 0.15 0.15 0.35 0.35
+                    Q 0.5 0.5 0 0.9
+                    Q -0.5 0.5 -0.9 0
+                    Q -0.5 -0.5 0 -1.4
+                    Q 0.5 -0.5 2.4 0
+                    Q 0.5 0.5 0 3.8
+                    Q -0.5 0.5 -5.8 0
+                    Q -0.5 -0.5 0 -9.4
+                    Q 0.5 -0.5 15.2 0
+                    Q 0.5 0.5 0 24.6
+                    Q -0.5 0.5 -39.8 0
+                    Q -0.5 -0.5 0 -64.4
+                    Q 0.5 -0.5 104.2 0
+                    Q 0.5 0.5 0 168.6
+                    Q -0.5 0.5 -168.6 0
+                    Q -0.5 -0.5 0 -273.2" 
+                    fill="none" 
+                    stroke="rgba(255,255,255,0.5)" 
+                    stroke-width="4" 
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    transform="scale(0.95)"/>
+                
+                <path d="M 0 0 
+                    Q 0.1 0.1 0.25 0.25
+                    Q 0.35 0.35 0 0.65
+                    Q -0.35 0.35 -0.65 0
+                    Q -0.35 -0.35 0 -1.0
+                    Q 0.35 -0.35 1.7 0
+                    Q 0.35 0.35 0 2.7
+                    Q -0.35 0.35 -4.4 0
+                    Q -0.35 -0.35 0 -7.1
+                    Q 0.35 -0.35 11.5 0
+                    Q 0.35 0.35 0 18.6
+                    Q -0.35 0.35 -30.1 0
+                    Q -0.35 -0.35 0 -48.7
+                    Q 0.35 -0.35 78.8 0
+                    Q 0.35 0.35 0 127.5
+                    Q -0.35 0.35 -127.5 0
+                    Q -0.35 -0.35 0 -206.3" 
+                    fill="none" 
+                    stroke="rgba(255,255,255,0.4)" 
+                    stroke-width="3" 
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    transform="scale(0.95)"/>
+                
+                <circle cx="0" cy="0" r="4" fill="rgba(255,255,255,1)"/>
+                <circle cx="0" cy="0" r="2" fill="rgba(255,255,255,0.8)"/>
+            </g>
+        </svg>
+    </div>
+    
+    <div class="instructions">
+        <h2>📥 Icon'ları İndirme Adımları:</h2>
+        <ol>
+            <li><strong>512x512 Icon:</strong>
+                <ul>
+                    <li>Yukarıdaki büyük icon'a <strong>sağ tıklayın</strong></li>
+                    <li>"Resmi farklı kaydet" veya "Save image as" seçin</li>
+                    <li>Adını <code>icon-512.png</code> olarak kaydedin</li>
+                    <li>Kayıt yeri: <code>C:\Users\user\master-application-agent\web-app\public\</code></li>
+                </ul>
+            </li>
+            <li><strong>192x192 Icon:</strong>
+                <ul>
+                    <li>Yukarıdaki küçük icon'a <strong>sağ tıklayın</strong></li>
+                    <li>"Resmi farklı kaydet" veya "Save image as" seçin</li>
+                    <li>Adını <code>icon-192.png</code> olarak kaydedin</li>
+                    <li>Aynı klasöre kaydedin</li>
+                </ul>
+            </li>
+        </ol>
+        
+        <p><strong>Not:</strong> Eğer sağ tıklama çalışmazsa, aşağıdaki butonları kullanın!</p>
+        
+        <button onclick="downloadIcon(512)">📥 512x512 Icon İndir</button>
+        <button onclick="downloadIcon(192)">📥 192x192 Icon İndir</button>
+    </div>
+    
+    <script>
+        function downloadIcon(size) {
+            const svg = document.getElementById(size === 512 ? 'icon512' : 'icon192');
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            
+            canvas.width = size;
+            canvas.height = size;
+            
+            img.onload = function() {
+                ctx.drawImage(img, 0, 0);
+                const pngFile = canvas.toDataURL('image/png');
+                const downloadLink = document.createElement('a');
+                downloadLink.download = `icon-${size}.png`;
+                downloadLink.href = pngFile;
+                downloadLink.click();
+            };
+            
+            img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+        }
+        
+        // Sayfa yüklendiğinde otomatik olarak icon'ları indir
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                console.log('Icon\'lar otomatik olarak indiriliyor...');
+                downloadIcon(512);
+                setTimeout(function() {
+                    downloadIcon(192);
+                    setTimeout(function() {
+                        alert('Icon\'lar başarıyla indirildi!\n\nLütfen Downloads klasöründen:\n- icon-512.png\n- icon-192.png\n\ndosyalarını şu klasöre taşıyın:\nC:\\Users\\user\\master-application-agent\\web-app\\public\\');
+                    }, 1000);
+                }, 1000);
+            }, 500);
+        });
+    </script>
+</body>
+</html>
+
