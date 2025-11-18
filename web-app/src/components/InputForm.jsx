@@ -390,7 +390,7 @@ function InputForm({ onSubmit, loading }) {
           {/* CV Upload (simüle edilmiş - gerçekte CV parse edilecek) */}
           <div className="cv-upload-section" style={{ marginBottom: '20px', padding: '15px', background: '#f5f5f5', borderRadius: '8px' }}>
             <label htmlFor="cvUpload" style={{ display: 'block', marginBottom: '10px', fontWeight: '500' }}>
-              📄 CV Yükle (Opsiyonel)
+              📄 CV Yükle (Önerilir)
             </label>
             <input
               type="file"
@@ -406,20 +406,30 @@ function InputForm({ onSubmit, loading }) {
                     .sort(() => Math.random() - 0.5)
                     .slice(0, 3)
                   setSuggestedBackgrounds(randomSuggestions)
+                  
+                  // CV'den otomatik çıkarılan veriler (simüle edilmiş)
+                  const simulatedResearchExp = (Math.random() * 3).toFixed(1) // 0-3 yıl arası
+                  const simulatedWorkExp = (Math.random() * 5).toFixed(1) // 0-5 yıl arası
+                  
                   // Otomatik seç ve ilk üçe sırala
                   setFormData(prev => {
                     const newBackground = [...randomSuggestions, ...prev.background.filter(b => !randomSuggestions.includes(b))]
                     return {
                       ...prev,
-                      background: [...new Set(newBackground)]
+                      background: [...new Set(newBackground)],
+                      researchExperience: simulatedResearchExp, // CV'den otomatik doldur
+                      workExperience: simulatedWorkExp // CV'den otomatik doldur
                     }
                   })
+                  
+                  // Başarı mesajı göster
+                  alert(`CV başarıyla yüklendi!\n\nOtomatik olarak çıkarılan bilgiler:\n- Araştırma Deneyimi: ${simulatedResearchExp} yıl\n- İş Deneyimi: ${simulatedWorkExp} yıl\n- Background önerileri: ${randomSuggestions.length} alan`)
                 }
               }}
               style={{ display: 'block', marginBottom: '10px' }}
             />
             <small style={{ color: '#666', fontStyle: 'italic' }}>
-              💡 Mavi renkte gösterilen alanlar CV'nize bakılarak yaptığımız önerilerdir
+              💡 CV yüklendiğinde araştırma ve iş deneyimi otomatik doldurulur. Mavi renkte gösterilen alanlar CV'nize bakılarak yaptığımız önerilerdir.
             </small>
           </div>
 
@@ -491,61 +501,6 @@ function InputForm({ onSubmit, loading }) {
           )}
         </div>
 
-        <div className="form-section">
-          <h2>🔬 Araştırma Deneyimi</h2>
-          <div className="form-group">
-            <label htmlFor="researchExperience">Araştırma Deneyimi (Yıl)</label>
-            <input
-              type="number"
-              id="researchExperience"
-              name="researchExperience"
-              value={formData.researchExperience}
-              onChange={handleChange}
-              min="0"
-              max="10"
-              step="0.5"
-              placeholder="0"
-            />
-            <small>Örn: 1.5 yıl araştırma asistanlığı</small>
-          </div>
-        </div>
-
-        <div className="form-section">
-          <h2>💼 İş Deneyimi</h2>
-          <div className="form-group">
-            <label htmlFor="workExperience">İş Deneyimi (Yıl)</label>
-            <input
-              type="number"
-              id="workExperience"
-              name="workExperience"
-              value={formData.workExperience}
-              onChange={handleChange}
-              min="0"
-              max="20"
-              step="0.5"
-              placeholder="0"
-            />
-            <small>İlgili alanda çalışma deneyimi</small>
-          </div>
-        </div>
-
-        <div className="form-section">
-          <h2>📄 Yayınlar</h2>
-          <div className="form-group">
-            <label htmlFor="publications">Yayın Sayısı</label>
-            <input
-              type="number"
-              id="publications"
-              name="publications"
-              value={formData.publications}
-              onChange={handleChange}
-              min="0"
-              max="50"
-              placeholder="0"
-            />
-            <small>Hakemli dergilerde yayınlanmış makale sayısı</small>
-          </div>
-        </div>
 
         <div className="form-section">
           <h2>📝 Referans Mektupları</h2>
@@ -630,9 +585,40 @@ function InputForm({ onSubmit, loading }) {
           </div>
         </div>
 
-        <div className="form-section">
-          <h2>🏆 Proje ve Başarılar</h2>
+        <div className="form-section" style={{ 
+          background: 'linear-gradient(135deg, #fff5e6 0%, #ffe8cc 100%)', 
+          padding: '25px', 
+          borderRadius: '12px', 
+          border: '2px solid #ffa500',
+          marginTop: '30px'
+        }}>
+          <h2 style={{ color: '#d97706', marginBottom: '15px' }}>
+            ⭐ Ekstra Başarılar (Size İleri Sunabilecek Parametreler)
+          </h2>
+          <p style={{ color: '#92400e', fontSize: '0.9rem', marginBottom: '20px', fontStyle: 'italic' }}>
+            Bu bölümdeki bilgiler sizi diğer adaylardan ayıran ve başvurunuzu güçlendiren ekstra başarılarınızdır.
+          </p>
           
+          <div className="form-group">
+            <label htmlFor="publications" style={{ fontWeight: '600', color: '#d97706' }}>
+              📄 Yayınlar (Hakemli Dergiler)
+            </label>
+            <input
+              type="number"
+              id="publications"
+              name="publications"
+              value={formData.publications}
+              onChange={handleChange}
+              min="0"
+              max="50"
+              placeholder="0"
+              style={{ borderColor: '#ffa500' }}
+            />
+            <small style={{ color: '#92400e' }}>
+              Hakemli dergilerde yayınlanmış makale sayısı (Çok az öğrencide olan, sizi öne çıkaracak önemli bir kriter)
+            </small>
+          </div>
+
           <div className="form-group">
             <label htmlFor="projectExperience">Proje Deneyimi</label>
             <select
@@ -640,6 +626,7 @@ function InputForm({ onSubmit, loading }) {
               name="projectExperience"
               value={formData.projectExperience}
               onChange={handleChange}
+              style={{ borderColor: '#ffa500' }}
             >
               <option value="none">Yok</option>
               <option value="national">Ulusal Proje (TÜBİTAK, vb.)</option>
@@ -647,7 +634,7 @@ function InputForm({ onSubmit, loading }) {
               <option value="international">Uluslararası Proje</option>
               <option value="multiple">Birden Fazla Proje</option>
             </select>
-            <small>Araştırmacı veya bursiyer olarak görev aldığınız projeler</small>
+            <small style={{ color: '#92400e' }}>Araştırmacı veya bursiyer olarak görev aldığınız projeler</small>
           </div>
 
           <div className="form-group">
@@ -657,6 +644,7 @@ function InputForm({ onSubmit, loading }) {
               name="competitionAchievements"
               value={formData.competitionAchievements}
               onChange={handleChange}
+              style={{ borderColor: '#ffa500' }}
             >
               <option value="none">Yok</option>
               <option value="bronze">3. (Bronz)</option>
@@ -664,7 +652,7 @@ function InputForm({ onSubmit, loading }) {
               <option value="gold">1. (Altın)</option>
               <option value="multiple">Birden Fazla</option>
             </select>
-            <small>TEKNOFEST, hackathon, vb. yarışmalarda derece</small>
+            <small style={{ color: '#92400e' }}>TEKNOFEST, hackathon, vb. yarışmalarda derece</small>
           </div>
         </div>
 
