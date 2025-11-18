@@ -34,10 +34,13 @@ function App() {
         try {
           // İlk denemede backend'i uyandırmak için health check yap
           if (attempt === 1) {
+            const healthController = new AbortController()
+            const healthTimeout = setTimeout(() => healthController.abort(), 30000)
             await fetch(`${apiUrl.replace('/match', '/health')}`, {
               method: 'GET',
-              timeout: 30000
+              signal: healthController.signal
             }).catch(() => {}) // Health check hatası önemsiz
+            clearTimeout(healthTimeout)
           }
           
           // Ana istek (60 saniye timeout)
