@@ -18,7 +18,12 @@ function App() {
     setError(null)
     
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || '/api'
+      // API URL'i belirle - production'da env'den, development'da proxy kullan
+      const apiUrl = import.meta.env.VITE_API_URL || 
+        (import.meta.env.DEV ? '/api' : 'https://master-application-agent.onrender.com/api')
+      
+      console.log('API URL:', apiUrl)
+      
       const response = await fetch(`${apiUrl}/match`, {
         method: 'POST',
         headers: {
@@ -32,6 +37,10 @@ function App() {
         })
       })
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
       const data = await response.json()
       
       if (data.success) {
@@ -40,8 +49,8 @@ function App() {
         setError(data.error || 'Bir hata oluştu')
       }
     } catch (err) {
-      setError('Backend API\'ye bağlanılamadı. Backend\'in çalıştığından emin olun.')
-      console.error('Error:', err)
+      console.error('API Error:', err)
+      setError(`Backend API'ye bağlanılamadı: ${err.message}. Lütfen internet bağlantınızı kontrol edin veya daha sonra tekrar deneyin.`)
     } finally {
       setLoading(false)
     }

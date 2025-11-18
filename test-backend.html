@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Backend Test</title>
+</head>
+<body>
+    <h1>Backend API Test</h1>
+    <button onclick="testHealth()">Test Health Endpoint</button>
+    <button onclick="testMatch()">Test Match Endpoint</button>
+    <div id="result"></div>
+
+    <script>
+        const API_URL = 'https://master-application-agent.onrender.com/api';
+        
+        async function testHealth() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                const data = await response.json();
+                resultDiv.innerHTML = `<pre>✅ Health Check OK: ${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (err) {
+                resultDiv.innerHTML = `<pre>❌ Error: ${err.message}</pre>`;
+            }
+        }
+        
+        async function testMatch() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing match endpoint...';
+            
+            try {
+                const response = await fetch(`${API_URL}/match`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        gpa: 3.5,
+                        language_score: 100,
+                        motivation_letter: 'I am very motivated to study robotics and control systems. I have a strong background in engineering and mathematics.',
+                        background: ['engineering', 'robotics']
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                resultDiv.innerHTML = `<pre>✅ Match Test OK: ${JSON.stringify(data, null, 2).substring(0, 500)}...</pre>`;
+            } catch (err) {
+                resultDiv.innerHTML = `<pre>❌ Error: ${err.message}</pre>`;
+            }
+        }
+    </script>
+</body>
+</html>
+
