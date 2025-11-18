@@ -13,11 +13,7 @@
         "simulator": true
       }
     },
-    "production": {
-      "ios": {
-        "bundleIdentifier": "com.masterapplicationagent.app"
-      }
-    }
+    "production": {}
   },
   "submit": {
     "production": {
