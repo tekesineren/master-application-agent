@@ -1,0 +1,10 @@
+{
+  "appId": "com.masterapplicationagent.app",
+  "appName": "Master Application Agent",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "iosScheme": "masterapp"
+  }
+}
+

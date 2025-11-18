@@ -10,7 +10,10 @@
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "axios": "^1.6.2"
+    "axios": "^1.6.2",
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/cli": "^6.0.0",
+    "@capacitor/ios": "^6.0.0"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",
