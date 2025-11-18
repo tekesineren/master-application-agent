@@ -157,10 +157,6 @@ function App() {
 
   // 3 temel parametreyi hesapla
   const calculateCoreMetrics = () => {
-    if (!results || !results.matches || results.matches.length === 0) {
-      return { gpa: 0, languageScore: 0, backgroundMatch: 0 }
-    }
-    
     // CV'den gelen veriler varsa onları kullan
     if (cvData) {
       const gpa = parseFloat(cvData.gpa) || 0
@@ -180,8 +176,14 @@ function App() {
       }
     }
     
-    // Sonuçlardan hesapla
-    const top3 = results.matches.slice(0, 3)
+    if (!results || !results.results) {
+      return { gpa: 0, languageScore: 0, backgroundMatch: 0 }
+    }
+    
+    // Sonuçlardan hesapla - high_match üniversitelerinden
+    const { high_match = [] } = results.results
+    const top3 = high_match.slice(0, 3)
+    
     if (top3.length === 0) return { gpa: 0, languageScore: 0, backgroundMatch: 0 }
     
     const avgMatch = top3.reduce((sum, m) => sum + (m.match_score || 0), 0) / top3.length
