@@ -47,7 +47,186 @@ UNIVERSITIES = [
         "required_background": ["engineering", "mechanical engineering"],
         "match_score": 0
     },
-    # Daha fazla okul eklenecek
+    {
+        "id": 3,
+        "name": "Stanford University",
+        "program": "MS in Computer Science",
+        "country": "USA",
+        "min_gpa": 3.8,
+        "min_language_score": 100,
+        "required_background": ["computer science", "engineering", "mathematics"],
+        "match_score": 0
+    },
+    {
+        "id": 4,
+        "name": "Carnegie Mellon University",
+        "program": "MS in Robotics",
+        "country": "USA",
+        "min_gpa": 3.6,
+        "min_language_score": 100,
+        "required_background": ["robotics", "engineering", "computer science"],
+        "match_score": 0
+    },
+    {
+        "id": 5,
+        "name": "University of California, Berkeley",
+        "program": "MEng in Electrical Engineering and Computer Sciences",
+        "country": "USA",
+        "min_gpa": 3.5,
+        "min_language_score": 90,
+        "required_background": ["electrical engineering", "computer science", "engineering"],
+        "match_score": 0
+    },
+    {
+        "id": 6,
+        "name": "Imperial College London",
+        "program": "MSc in Advanced Robotics",
+        "country": "UK",
+        "min_gpa": 3.5,
+        "min_language_score": 92,
+        "required_background": ["robotics", "engineering", "mechanical engineering"],
+        "match_score": 0
+    },
+    {
+        "id": 7,
+        "name": "University of Cambridge",
+        "program": "MPhil in Advanced Computer Science",
+        "country": "UK",
+        "min_gpa": 3.7,
+        "min_language_score": 110,
+        "required_background": ["computer science", "mathematics", "engineering"],
+        "match_score": 0
+    },
+    {
+        "id": 8,
+        "name": "EPFL",
+        "program": "Master in Robotics",
+        "country": "Switzerland",
+        "min_gpa": 3.5,
+        "min_language_score": 100,
+        "required_background": ["robotics", "engineering", "control systems"],
+        "match_score": 0
+    },
+    {
+        "id": 9,
+        "name": "TU Delft",
+        "program": "MSc in Robotics",
+        "country": "Netherlands",
+        "min_gpa": 3.3,
+        "min_language_score": 90,
+        "required_background": ["robotics", "engineering", "mechanical engineering"],
+        "match_score": 0
+    },
+    {
+        "id": 10,
+        "name": "Technical University of Munich",
+        "program": "MSc in Robotics, Cognition, Intelligence",
+        "country": "Germany",
+        "min_gpa": 3.4,
+        "min_language_score": 88,
+        "required_background": ["robotics", "computer science", "engineering"],
+        "match_score": 0
+    },
+    {
+        "id": 11,
+        "name": "ETH Zurich",
+        "program": "MSc in Computer Science",
+        "country": "Switzerland",
+        "min_gpa": 3.5,
+        "min_language_score": 100,
+        "required_background": ["computer science", "mathematics", "engineering"],
+        "match_score": 0
+    },
+    {
+        "id": 12,
+        "name": "Georgia Institute of Technology",
+        "program": "MS in Robotics",
+        "country": "USA",
+        "min_gpa": 3.5,
+        "min_language_score": 100,
+        "required_background": ["robotics", "engineering", "computer science"],
+        "match_score": 0
+    },
+    {
+        "id": 13,
+        "name": "University of Oxford",
+        "program": "MSc in Computer Science",
+        "country": "UK",
+        "min_gpa": 3.7,
+        "min_language_score": 110,
+        "required_background": ["computer science", "mathematics", "engineering"],
+        "match_score": 0
+    },
+    {
+        "id": 14,
+        "name": "University of Toronto",
+        "program": "MSc in Mechanical and Industrial Engineering",
+        "country": "Canada",
+        "min_gpa": 3.3,
+        "min_language_score": 93,
+        "required_background": ["mechanical engineering", "engineering"],
+        "match_score": 0
+    },
+    {
+        "id": 15,
+        "name": "National University of Singapore",
+        "program": "MSc in Mechanical Engineering",
+        "country": "Singapore",
+        "min_gpa": 3.4,
+        "min_language_score": 85,
+        "required_background": ["mechanical engineering", "engineering"],
+        "match_score": 0
+    },
+    {
+        "id": 16,
+        "name": "KAIST",
+        "program": "MS in Robotics",
+        "country": "South Korea",
+        "min_gpa": 3.3,
+        "min_language_score": 83,
+        "required_background": ["robotics", "engineering", "computer science"],
+        "match_score": 0
+    },
+    {
+        "id": 17,
+        "name": "University of Tokyo",
+        "program": "Master in Information Science and Technology",
+        "country": "Japan",
+        "min_gpa": 3.4,
+        "min_language_score": 90,
+        "required_background": ["computer science", "engineering", "mathematics"],
+        "match_score": 0
+    },
+    {
+        "id": 18,
+        "name": "KTH Royal Institute of Technology",
+        "program": "MSc in Systems, Control and Robotics",
+        "country": "Sweden",
+        "min_gpa": 3.3,
+        "min_language_score": 90,
+        "required_background": ["robotics", "control systems", "engineering"],
+        "match_score": 0
+    },
+    {
+        "id": 19,
+        "name": "Aalto University",
+        "program": "MSc in Automation and Electrical Engineering",
+        "country": "Finland",
+        "min_gpa": 3.2,
+        "min_language_score": 92,
+        "required_background": ["electrical engineering", "engineering", "control systems"],
+        "match_score": 0
+    },
+    {
+        "id": 20,
+        "name": "University of Edinburgh",
+        "program": "MSc in Robotics and Autonomous Systems",
+        "country": "UK",
+        "min_gpa": 3.4,
+        "min_language_score": 92,
+        "required_background": ["robotics", "engineering", "computer science"],
+        "match_score": 0
+    }
 ]
 
 def calculate_match_score(user_data, university):
