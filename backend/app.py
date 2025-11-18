@@ -223,6 +223,39 @@ UNIVERSITIES = [
     }
 ]
 
+def normalize_language_score(test_type, score):
+    """
+    Farklı dil sınavlarını 0-100 arası normalize eder
+    """
+    score = float(score)
+    
+    if test_type == 'toefl':
+        # TOEFL iBT: 0-120 -> 0-100
+        return (score / 120.0) * 100
+    elif test_type == 'ielts':
+        # IELTS: 0-9 -> 0-100
+        return (score / 9.0) * 100
+    elif test_type == 'cambridge_cae':
+        # Cambridge CAE: 0-210 -> 0-100 (Grade A: 200-210, B: 193-199, C: 180-192)
+        return (score / 210.0) * 100
+    elif test_type == 'cambridge_cpe':
+        # Cambridge CPE: 0-230 -> 0-100 (Grade A: 220-230, B: 213-219, C: 200-212)
+        return (score / 230.0) * 100
+    elif test_type == 'pte':
+        # PTE Academic: 0-90 -> 0-100
+        return (score / 90.0) * 100
+    elif test_type == 'duolingo':
+        # Duolingo: 0-160 -> 0-100
+        return (score / 160.0) * 100
+    elif test_type == 'toeic':
+        # TOEIC: 0-990 -> 0-100
+        return (score / 990.0) * 100
+    elif test_type == 'yds' or test_type == 'yokdil':
+        # YDS/YÖKDİL: 0-100 -> direkt
+        return score
+    else:
+        return 0
+
 def convert_gpa_to_4_0(gpa, grading_system):
     """
     Farklı notlandırma sistemlerini 4.0 GPA sistemine dönüştürür
@@ -234,9 +267,6 @@ def convert_gpa_to_4_0(gpa, grading_system):
     
     if grading_system == '4.0':
         return float(gpa)
-    elif grading_system == '100':
-        # 100'lük sistemden 4.0'a: (Not / 100) * 4.0
-        return (float(gpa) / 100.0) * 4.0
     elif grading_system == 'uk':
         # UK sistemi: 70+ = First (3.7-4.0), 60-69 = Upper Second (3.0-3.6), 50-59 = Lower Second (2.0-2.9), <50 = Third (0-1.9)
         if gpa >= 70:
@@ -440,17 +470,58 @@ def calculate_match_score(user_data, university):
         score += 1.0
     
     # 2. Dil skoru değerlendirmesi (20 puan)
-    language_score = user_data.get('language_score', 0)
-    if language_score >= 100:  # TOEFL 100+ / IELTS 7.0+
-        score += 20
-    elif language_score >= 90:  # TOEFL 90+ / IELTS 6.5+
-        score += 18
-    elif language_score >= 84:  # TOEFL 84+ / IELTS 6.0+
-        score += 15
-    elif language_score >= 70:  # TOEFL 70+ / IELTS 5.5+
-        score += 10
+    language_test_type = user_data.get('language_test_type', '')
+    language_test_score = user_data.get('language_test_score')
+    
+    if language_test_type and language_test_score:
+        # Sınav tipine göre normalize edilmiş skor (0-100 arası)
+        normalized_score = normalize_language_score(language_test_type, language_test_score)
+        
+        if normalized_score >= 90:  # Çok yüksek seviye
+            score += 20
+        elif normalized_score >= 80:  # Yüksek seviye
+            score += 18
+        elif normalized_score >= 70:  # İyi seviye
+            score += 15
+        elif normalized_score >= 60:  # Orta seviye
+            score += 10
+        else:
+            score += 5
     else:
-        score += 5
+        score += 0  # Dil sınavı yoksa puan yok
+
+def normalize_language_score(test_type, score):
+    """
+    Farklı dil sınavlarını 0-100 arası normalize eder
+    """
+    score = float(score)
+    
+    if test_type == 'toefl':
+        # TOEFL iBT: 0-120 -> 0-100
+        return (score / 120.0) * 100
+    elif test_type == 'ielts':
+        # IELTS: 0-9 -> 0-100
+        return (score / 9.0) * 100
+    elif test_type == 'cambridge_cae':
+        # Cambridge CAE: 0-210 -> 0-100 (Grade A: 200-210, B: 193-199, C: 180-192)
+        return (score / 210.0) * 100
+    elif test_type == 'cambridge_cpe':
+        # Cambridge CPE: 0-230 -> 0-100 (Grade A: 220-230, B: 213-219, C: 200-212)
+        return (score / 230.0) * 100
+    elif test_type == 'pte':
+        # PTE Academic: 0-90 -> 0-100
+        return (score / 90.0) * 100
+    elif test_type == 'duolingo':
+        # Duolingo: 0-160 -> 0-100
+        return (score / 160.0) * 100
+    elif test_type == 'toeic':
+        # TOEIC: 0-990 -> 0-100
+        return (score / 990.0) * 100
+    elif test_type == 'yds' or test_type == 'yokdil':
+        # YDS/YÖKDİL: 0-100 -> direkt
+        return score
+    else:
+        return 0
     
     # 3. Background eşleşmesi (15 puan)
     user_background = user_data.get('background', [])

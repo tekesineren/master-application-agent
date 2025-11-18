@@ -55,7 +55,8 @@ function App() {
             body: JSON.stringify({
               gpa: parseFloat(formData.gpa),
               grading_system: formData.gradingSystem,
-              language_score: parseInt(formData.languageScore) || 0,
+              language_test_type: formData.languageTestType,
+              language_test_score: formData.languageTestScore ? parseFloat(formData.languageTestScore) : null,
               background: formData.background,
               research_experience: parseFloat(formData.researchExperience) || 0,
               work_experience: parseFloat(formData.workExperience) || 0,

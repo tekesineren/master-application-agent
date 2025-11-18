@@ -66,7 +66,7 @@ const approvedOtherFields = [
 ]
 
 const countries = [
-  { value: 'turkey', label: 'Türkiye', gradingSystem: '100' },
+  { value: 'turkey', label: 'Türkiye', gradingSystem: '4.0' },
   { value: 'usa', label: 'USA', gradingSystem: '4.0' },
   { value: 'uk', label: 'UK', gradingSystem: 'uk' },
   { value: 'germany', label: 'Germany', gradingSystem: 'german' },
@@ -76,11 +76,30 @@ const countries = [
 
 const gradingSystems = {
   '4.0': { label: '4.0 GPA Sistemi', min: 0, max: 4.0, step: 0.01, placeholder: '3.5' },
-  '100': { label: '100\'lük Sistem', min: 0, max: 100, step: 1, placeholder: '85' },
   'uk': { label: 'UK Sistemi (First/Upper Second/Lower Second/Third)', min: 0, max: 100, step: 1, placeholder: '70 (Upper Second)' },
   'german': { label: 'Alman Sistemi (1.0-4.0, 1.0 en iyi)', min: 1.0, max: 4.0, step: 0.1, placeholder: '2.0' },
   'french': { label: 'Fransız Sistemi (0-20, 20 en iyi)', min: 0, max: 20, step: 0.1, placeholder: '15' },
   'other': { label: 'Diğer', min: 0, max: 100, step: 0.01, placeholder: 'Not ortalaması' }
+}
+
+const languageTests = [
+  { value: 'toefl', label: 'TOEFL iBT', min: 0, max: 120, placeholder: '100', description: 'Test of English as a Foreign Language' },
+  { value: 'ielts', label: 'IELTS Academic', min: 0, max: 9, step: 0.5, placeholder: '7.0', description: 'International English Language Testing System' },
+  { value: 'cambridge_cae', label: 'Cambridge CAE', min: 0, max: 210, placeholder: '180', description: 'Cambridge Advanced English (Grade A/B/C)' },
+  { value: 'cambridge_cpe', label: 'Cambridge CPE', min: 0, max: 230, placeholder: '200', description: 'Cambridge Proficiency English (Grade A/B/C)' },
+  { value: 'pte', label: 'PTE Academic', min: 0, max: 90, placeholder: '71', description: 'Pearson Test of English Academic' },
+  { value: 'duolingo', label: 'Duolingo English Test', min: 0, max: 160, placeholder: '120', description: 'Duolingo English Test' },
+  { value: 'toeic', label: 'TOEIC', min: 0, max: 990, placeholder: '850', description: 'Test of English for International Communication' },
+  { value: 'yds', label: 'YDS / eYDS', min: 0, max: 100, placeholder: '70', description: 'Yabancı Dil Bilgisi Seviye Tespit Sınavı' },
+  { value: 'yokdil', label: 'YÖKDİL / e-YÖKDİL', min: 0, max: 100, placeholder: '70', description: 'Yükseköğretim Kurumları Yabancı Dil Sınavı' }
+]
+
+// Background isimlerini formatla (Title Case)
+function formatBackgroundName(name) {
+  return name
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ')
 }
 
 function InputForm({ onSubmit, loading }) {
@@ -95,7 +114,9 @@ function InputForm({ onSubmit, loading }) {
     otherBackground: '',
     otherConfirmed: false,
     country: 'turkey',
-    gradingSystem: '100',
+    gradingSystem: '4.0',
+    languageTestType: '',
+    languageTestScore: '',
     entranceExamRank: '',
     undergraduateUniversityRanking: '',
     greScore: '',
@@ -317,23 +338,50 @@ function InputForm({ onSubmit, loading }) {
           </div>
 
           <div className="form-group">
-            <label htmlFor="languageScore">Yabancı Dil Skoru</label>
+            <label htmlFor="languageTestType">Yabancı Dil Sınavı</label>
             <select
-              id="languageScore"
-              name="languageScore"
-              value={formData.languageScore}
-              onChange={handleChange}
+              id="languageTestType"
+              name="languageTestType"
+              value={formData.languageTestType}
+              onChange={(e) => {
+                setFormData(prev => ({
+                  ...prev,
+                  languageTestType: e.target.value,
+                  languageTestScore: '' // Sınav değişince skoru sıfırla
+                }))
+              }}
               required
             >
               <option value="">Seçiniz</option>
-              <option value="100">TOEFL iBT ≥ 100 / IELTS ≥ 7.0</option>
-              <option value="90">TOEFL iBT ≥ 90 / IELTS ≥ 6.5</option>
-              <option value="84">TOEFL iBT ≥ 84 / IELTS ≥ 6.0</option>
-              <option value="70">TOEFL iBT ≥ 70 / IELTS ≥ 5.5</option>
-              <option value="0">Yok / Düşük</option>
+              {languageTests.map(test => (
+                <option key={test.value} value={test.value}>{test.label}</option>
+              ))}
             </select>
-            <small>TOEFL, IELTS veya eşdeğer sınav skoru</small>
+            <small>Uluslararası kabul gören dil sınavları</small>
           </div>
+
+          {formData.languageTestType && (
+            <div className="form-group">
+              <label htmlFor="languageTestScore">
+                {languageTests.find(t => t.value === formData.languageTestType)?.label} Skoru
+              </label>
+              <input
+                type="number"
+                id="languageTestScore"
+                name="languageTestScore"
+                value={formData.languageTestScore}
+                onChange={handleChange}
+                step={languageTests.find(t => t.value === formData.languageTestType)?.step || 1}
+                min={languageTests.find(t => t.value === formData.languageTestType)?.min || 0}
+                max={languageTests.find(t => t.value === formData.languageTestType)?.max || 120}
+                placeholder={languageTests.find(t => t.value === formData.languageTestType)?.placeholder || 'Skor'}
+                required
+              />
+              <small>
+                {languageTests.find(t => t.value === formData.languageTestType)?.description}
+              </small>
+            </div>
+          )}
         </div>
 
         <div className="form-section">
@@ -358,39 +406,50 @@ function InputForm({ onSubmit, loading }) {
                     .sort(() => Math.random() - 0.5)
                     .slice(0, 3)
                   setSuggestedBackgrounds(randomSuggestions)
-                  // Otomatik seç
-                  setFormData(prev => ({
-                    ...prev,
-                    background: [...new Set([...prev.background, ...randomSuggestions])]
-                  }))
+                  // Otomatik seç ve ilk üçe sırala
+                  setFormData(prev => {
+                    const newBackground = [...randomSuggestions, ...prev.background.filter(b => !randomSuggestions.includes(b))]
+                    return {
+                      ...prev,
+                      background: [...new Set(newBackground)]
+                    }
+                  })
                 }
               }}
               style={{ display: 'block', marginBottom: '10px' }}
             />
-            <small style={{ color: '#666' }}>
-              CV'nizden otomatik olarak 3 alan önerilecek (mavi renkte gösterilecek)
+            <small style={{ color: '#666', fontStyle: 'italic' }}>
+              💡 Mavi renkte gösterilen alanlar CV'nize bakılarak yaptığımız önerilerdir
             </small>
           </div>
 
           <div className="background-grid">
-            {backgroundOptions.filter(opt => opt !== 'other').map(option => {
-              const isSuggested = suggestedBackgrounds.includes(option)
-              const isSelected = formData.background.includes(option)
-              return (
-                <label 
-                  key={option} 
-                  className={`checkbox-label ${isSuggested ? 'suggested' : ''} ${isSelected ? 'selected' : ''}`}
-                >
-                  <input
-                    type="checkbox"
-                    checked={isSelected}
-                    onChange={() => handleBackgroundToggle(option)}
-                  />
-                  <span>{option.charAt(0).toUpperCase() + option.slice(1).replace(/\b\w/g, l => l.toUpperCase())}</span>
-                  {isSuggested && <span className="suggested-badge">CV</span>}
-                </label>
-              )
-            })}
+            {(() => {
+              // Önce önerilenleri, sonra diğerlerini sırala
+              const otherOptions = backgroundOptions.filter(opt => opt !== 'other' && !suggestedBackgrounds.includes(opt))
+              const sortedOptions = [...suggestedBackgrounds, ...otherOptions]
+              
+              return sortedOptions.map((option, index) => {
+                const isSuggested = suggestedBackgrounds.includes(option)
+                const isSelected = formData.background.includes(option)
+                const isInTopThree = isSuggested && suggestedBackgrounds.indexOf(option) < 3
+                
+                return (
+                  <label 
+                    key={option} 
+                    className={`checkbox-label ${isSuggested ? 'suggested' : ''} ${isSelected ? 'selected' : ''}`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => handleBackgroundToggle(option)}
+                    />
+                    <span>{formatBackgroundName(option)}</span>
+                    {isInTopThree && <span className="suggested-badge">Öneri</span>}
+                  </label>
+                )
+              })
+            })()}
             
             {/* Other option - grid içinde en sonda */}
             <label className={`checkbox-label ${formData.background.includes('other') ? 'selected' : ''}`}>
