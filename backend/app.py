@@ -10,18 +10,12 @@ import os
 
 app = Flask(__name__)
 
-# CORS ayarları - Production için güvenli
-allowed_origins = [
-    "http://localhost:3000",  # Local development
-    "http://localhost:5000",  # Local backend
-    os.getenv("FRONTEND_URL", "*")  # Production frontend URL
-]
-
+# CORS ayarları - Tüm originlere izin ver (Expo Go ve web için)
 CORS(app, resources={
     r"/api/*": {
-        "origins": allowed_origins if os.getenv("FLASK_ENV") == "production" else "*",
+        "origins": "*",  # Expo Go ve tüm web uygulamaları için
         "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type"]
+        "allow_headers": ["Content-Type", "Authorization"]
     }
 })
 
