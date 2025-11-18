@@ -379,22 +379,6 @@ function InputForm({ onSubmit, loading }) {
             <small>{gradingSystems[formData.gradingSystem]?.label}</small>
           </div>
 
-          {formData.country === 'turkey' && (
-            <div className="form-group">
-              <label htmlFor="entranceExamRank">ÖSYM Sıralaması (Opsiyonel)</label>
-              <input
-                type="number"
-                id="entranceExamRank"
-                name="entranceExamRank"
-                value={formData.entranceExamRank}
-                onChange={handleChange}
-                min="1"
-                placeholder="15000"
-              />
-              <small>Örn: 15000 (sıralama) - Türkiye için ek değerlendirme</small>
-            </div>
-          )}
-
           <div className="form-group">
             <label htmlFor="undergraduateUniversityRanking">Lisans Üniversitesi Sıralaması</label>
             <select
