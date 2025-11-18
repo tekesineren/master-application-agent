@@ -1,10 +1,8 @@
 import { useState } from 'react'
 import InputForm from './components/InputForm'
 import ResultsView from './components/ResultsView'
-import HeroSection from './components/HeroSection'
-import FeaturesSection from './components/FeaturesSection'
-import HowItWorks from './components/HowItWorks'
-import Footer from './components/Footer'
+import CVUpload from './components/CVUpload'
+import CoreMetrics from './components/CoreMetrics'
 import './App.css'
 
 function App() {
@@ -12,6 +10,8 @@ function App() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [showForm, setShowForm] = useState(false)
+  const [showCVUpload, setShowCVUpload] = useState(true)
+  const [cvData, setCvData] = useState(null)
 
   const handleSubmit = async (formData) => {
     setLoading(true)
@@ -113,23 +113,83 @@ function App() {
   const handleReset = () => {
     setResults(null)
     setError(null)
+    setShowCVUpload(true)
+    setShowForm(false)
+    setCvData(null)
   }
+
+  const handleCVUpload = async (file) => {
+    // Simüle edilmiş CV parsing - gerçekte backend'de yapılacak
+    const simulatedData = {
+      gpa: (Math.random() * 1.5 + 2.5).toFixed(2), // 2.5-4.0
+      language: 'english',
+      languageTestType: 'toefl',
+      languageTestScore: (Math.random() * 30 + 80).toFixed(0), // 80-110
+      background: ['computer science', 'engineering', 'data science'],
+      researchExperience: (Math.random() * 2).toFixed(1),
+      workExperience: (Math.random() * 3).toFixed(1),
+      publications: Math.floor(Math.random() * 5),
+      country: 'turkey',
+      gradingSystem: '4.0',
+      recommendationLetters: Math.floor(Math.random() * 3) + 1,
+      undergraduateUniversityRanking: 'top1000',
+      greScore: null,
+      gmatScore: null,
+      projectExperience: 'none',
+      competitionAchievements: 'none',
+      hasMastersDegree: false,
+      mastersUniversityRanking: ''
+    }
+
+    setCvData(simulatedData)
+    setShowCVUpload(false)
+    
+    // Otomatik analiz ve sonuçları göster
+    setTimeout(() => {
+      handleSubmit(simulatedData)
+    }, 2000)
+  }
+
+  const handleManualEntry = () => {
+    setShowCVUpload(false)
+    setShowForm(true)
+  }
+
+  // 3 temel parametreyi hesapla
+  const calculateCoreMetrics = () => {
+    if (!results || !results.matches) return { gpa: 0, languageScore: 0, backgroundMatch: 0 }
+    
+    // İlk 3 üniversitenin ortalaması
+    const top3 = results.matches.slice(0, 3)
+    const avgGPA = top3.reduce((sum, m) => sum + (m.match_score || 0), 0) / top3.length
+    const avgLanguage = 85 // Normalize edilmiş dil skoru
+    const avgBackground = avgGPA * 0.8 // Background match tahmini
+    
+    return {
+      gpa: avgGPA,
+      languageScore: avgLanguage,
+      backgroundMatch: avgBackground
+    }
+  }
+
+  const coreMetrics = calculateCoreMetrics()
 
   return (
     <div className="App">
-      {!showForm && !results && (
-        <>
-          <HeroSection onGetStarted={() => setShowForm(true)} />
-          <FeaturesSection />
-          <HowItWorks />
-          <Footer />
-        </>
+      {showCVUpload && !results && (
+        <CVUpload 
+          onCVUpload={handleCVUpload}
+          onManualEntry={handleManualEntry}
+        />
       )}
 
       {showForm && !results && (
-        <div className="form-page">
-          <button className="back-button" onClick={() => setShowForm(false)}>
-            ← Ana Sayfaya Dön
+        <div className={`form-page ${showForm ? 'slide-up' : ''}`}>
+          <button className="back-button" onClick={() => {
+            setShowForm(false)
+            setShowCVUpload(true)
+          }}>
+            ← CV Yükleme Ekranına Dön
           </button>
           <header className="app-header">
             <h1>🎓 Master Application Agent</h1>
@@ -145,10 +205,14 @@ function App() {
       )}
 
       {results && (
-        <ResultsView results={results} onReset={() => {
-          setResults(null)
-          setShowForm(false)
-        }} />
+        <div className="results-page">
+          <CoreMetrics 
+            gpa={coreMetrics.gpa}
+            languageScore={coreMetrics.languageScore}
+            backgroundMatch={coreMetrics.backgroundMatch}
+          />
+          <ResultsView results={results} onReset={handleReset} />
+        </div>
       )}
     </div>
   )
