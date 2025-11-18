@@ -584,97 +584,146 @@ def parse_cv_content(text):
     text_lower = text.lower()
     extracted_data = {}
     
-    # GPA extraction
+    # GPA extraction - daha kapsamlı pattern'ler
     gpa_patterns = [
-        r'gpa[:\s]+([0-9]+\.[0-9]+)',
-        r'grade point average[:\s]+([0-9]+\.[0-9]+)',
-        r'not ortalaması[:\s]+([0-9]+\.[0-9]+)',
+        r'gpa[:\s]*([0-9]+\.[0-9]+)',
+        r'grade point average[:\s]*([0-9]+\.[0-9]+)',
+        r'not ortalaması[:\s]*([0-9]+\.[0-9]+)',
+        r'not[:\s]*([0-9]+\.[0-9]+)',
         r'([0-9]\.[0-9]+)\s*/\s*4\.0',
-        r'([0-9]\.[0-9]+)\s*out of\s*4\.0'
+        r'([0-9]\.[0-9]+)\s*out of\s*4\.0',
+        r'([0-9]\.[0-9]+)\s*\(4\.0',
+        r'cgpa[:\s]*([0-9]+\.[0-9]+)',
+        r'cumulative gpa[:\s]*([0-9]+\.[0-9]+)'
     ]
     for pattern in gpa_patterns:
         match = re.search(pattern, text_lower, re.IGNORECASE)
         if match:
-            gpa = float(match.group(1))
-            if 0 <= gpa <= 4.0:
-                extracted_data['gpa'] = gpa
-                break
+            try:
+                gpa = float(match.group(1))
+                if 0 <= gpa <= 4.0:
+                    extracted_data['gpa'] = gpa
+                    break
+            except:
+                continue
     
-    # Language scores
-    toefl_pattern = r'toefl[:\s]+(\d{2,3})'
-    ielts_pattern = r'ielts[:\s]+(\d\.\d)'
-    yds_pattern = r'yds[:\s]+(\d{2,3})'
-    
-    if re.search(toefl_pattern, text_lower, re.IGNORECASE):
-        match = re.search(toefl_pattern, text_lower, re.IGNORECASE)
+    # Language scores - daha kapsamlı pattern'ler
+    toefl_patterns = [
+        r'toefl[:\s]*(\d{2,3})',
+        r'toefl ibt[:\s]*(\d{2,3})',
+        r'toefl.*?(\d{2,3})',
+        r'(\d{2,3})\s*toefl'
+    ]
+    for pattern in toefl_patterns:
+        match = re.search(pattern, text_lower, re.IGNORECASE)
         if match:
-            score = int(match.group(1))
-            if 0 <= score <= 120:
-                extracted_data['language_test_type'] = 'toefl'
-                extracted_data['language_test_score'] = score
+            try:
+                score = int(match.group(1))
+                if 0 <= score <= 120:
+                    extracted_data['language_test_type'] = 'toefl'
+                    extracted_data['language_test_score'] = score
+                    break
+            except:
+                continue
     
-    if re.search(ielts_pattern, text_lower, re.IGNORECASE):
-        match = re.search(ielts_pattern, text_lower, re.IGNORECASE)
+    ielts_patterns = [
+        r'ielts[:\s]*(\d\.\d)',
+        r'ielts academic[:\s]*(\d\.\d)',
+        r'ielts.*?(\d\.\d)',
+        r'(\d\.\d)\s*ielts'
+    ]
+    for pattern in ielts_patterns:
+        match = re.search(pattern, text_lower, re.IGNORECASE)
         if match:
-            score = float(match.group(1))
-            if 0 <= score <= 9:
-                extracted_data['language_test_type'] = 'ielts'
-                extracted_data['language_test_score'] = score
+            try:
+                score = float(match.group(1))
+                if 0 <= score <= 9:
+                    extracted_data['language_test_type'] = 'ielts'
+                    extracted_data['language_test_score'] = score
+                    break
+            except:
+                continue
     
-    if re.search(yds_pattern, text_lower, re.IGNORECASE):
-        match = re.search(yds_pattern, text_lower, re.IGNORECASE)
+    yds_patterns = [
+        r'yds[:\s]*(\d{2,3})',
+        r'eyds[:\s]*(\d{2,3})',
+        r'yökdil[:\s]*(\d{2,3})',
+        r'e-yökdil[:\s]*(\d{2,3})'
+    ]
+    for pattern in yds_patterns:
+        match = re.search(pattern, text_lower, re.IGNORECASE)
         if match:
-            score = int(match.group(1))
-            if 0 <= score <= 100:
-                extracted_data['language_test_type'] = 'yds'
-                extracted_data['language_test_score'] = score
+            try:
+                score = int(match.group(1))
+                if 0 <= score <= 100:
+                    extracted_data['language_test_type'] = 'yds'
+                    extracted_data['language_test_score'] = score
+                    break
+            except:
+                continue
     
-    # Background fields extraction
+    # Background fields extraction - daha kapsamlı
     background_keywords = {
-        'computer science': ['computer science', 'cs', 'bilgisayar'],
-        'engineering': ['engineering', 'mühendislik'],
-        'robotics': ['robotics', 'robotik'],
-        'data science': ['data science', 'veri bilimi'],
-        'mechanical engineering': ['mechanical engineering', 'makine mühendisliği'],
-        'electrical engineering': ['electrical engineering', 'elektrik mühendisliği'],
-        'mathematics': ['mathematics', 'matematik'],
-        'physics': ['physics', 'fizik']
+        'computer science': ['computer science', 'cs', 'bilgisayar', 'bilgisayar bilimi', 'computer engineering'],
+        'engineering': ['engineering', 'mühendislik', 'engineer'],
+        'robotics': ['robotics', 'robotik', 'robot'],
+        'data science': ['data science', 'veri bilimi', 'data scientist', 'machine learning', 'ml'],
+        'mechanical engineering': ['mechanical engineering', 'makine mühendisliği', 'mechanical'],
+        'electrical engineering': ['electrical engineering', 'elektrik mühendisliği', 'electrical', 'ee'],
+        'mathematics': ['mathematics', 'matematik', 'math', 'applied math'],
+        'physics': ['physics', 'fizik'],
+        'software engineering': ['software engineering', 'yazılım mühendisliği', 'software'],
+        'artificial intelligence': ['artificial intelligence', 'ai', 'yapay zeka'],
+        'control systems': ['control systems', 'kontrol sistemleri', 'control engineering'],
+        'statistics': ['statistics', 'istatistik']
     }
     
     found_backgrounds = []
     for field, keywords in background_keywords.items():
         for keyword in keywords:
-            if keyword in text_lower:
+            # Kelime sınırları ile arama (tam kelime eşleşmesi)
+            pattern = r'\b' + re.escape(keyword) + r'\b'
+            if re.search(pattern, text_lower, re.IGNORECASE):
                 found_backgrounds.append(field)
                 break
     
     if found_backgrounds:
         extracted_data['background'] = list(set(found_backgrounds))
     
-    # Research experience
+    # Research experience - daha esnek pattern'ler
     research_patterns = [
-        r'research[:\s]+(\d+\.?\d*)\s*(?:year|yıl)',
-        r'araştırma[:\s]+(\d+\.?\d*)\s*(?:year|yıl)',
-        r'(\d+\.?\d*)\s*(?:year|yıl).*research'
+        r'research[:\s]*(\d+\.?\d*)\s*(?:year|yıl|yr)',
+        r'araştırma[:\s]*(\d+\.?\d*)\s*(?:year|yıl|yr)',
+        r'(\d+\.?\d*)\s*(?:year|yıl|yr).*research',
+        r'research assistant[:\s]*(\d+\.?\d*)',
+        r'ra[:\s]*(\d+\.?\d*)'
     ]
     for pattern in research_patterns:
         match = re.search(pattern, text_lower, re.IGNORECASE)
         if match:
-            extracted_data['research_experience'] = float(match.group(1))
-            break
+            try:
+                extracted_data['research_experience'] = float(match.group(1))
+                break
+            except:
+                continue
     
-    # Work experience
+    # Work experience - daha esnek pattern'ler
     work_patterns = [
-        r'work experience[:\s]+(\d+\.?\d*)\s*(?:year|yıl)',
-        r'experience[:\s]+(\d+\.?\d*)\s*(?:year|yıl)',
-        r'(\d+\.?\d*)\s*(?:year|yıl).*experience',
-        r'(\d+)\s*(?:year|yıl).*work'
+        r'work experience[:\s]*(\d+\.?\d*)\s*(?:year|yıl|yr)',
+        r'experience[:\s]*(\d+\.?\d*)\s*(?:year|yıl|yr)',
+        r'(\d+\.?\d*)\s*(?:year|yıl|yr).*experience',
+        r'(\d+)\s*(?:year|yıl|yr).*work',
+        r'professional experience[:\s]*(\d+\.?\d*)',
+        r'employment[:\s]*(\d+\.?\d*)'
     ]
     for pattern in work_patterns:
         match = re.search(pattern, text_lower, re.IGNORECASE)
         if match:
-            extracted_data['work_experience'] = float(match.group(1))
-            break
+            try:
+                extracted_data['work_experience'] = float(match.group(1))
+                break
+            except:
+                continue
     
     # Publications
     pub_patterns = [
