@@ -9,7 +9,60 @@ const backgroundOptions = [
   'computer science',
   'electrical engineering',
   'mathematics',
-  'physics'
+  'physics',
+  'data science',
+  'artificial intelligence',
+  'machine learning',
+  'software engineering',
+  'biomedical engineering',
+  'chemical engineering',
+  'civil engineering',
+  'aerospace engineering',
+  'industrial engineering',
+  'materials science',
+  'statistics',
+  'applied mathematics',
+  'computational science',
+  'information technology',
+  'cybersecurity',
+  'bioengineering',
+  'environmental engineering',
+  'systems engineering',
+  'mechatronics',
+  'automation',
+  'signal processing',
+  'optimization',
+  'control theory',
+  'neural networks',
+  'computer vision',
+  'natural language processing',
+  'quantum computing',
+  'biotechnology',
+  'nanotechnology',
+  'renewable energy',
+  'sustainable engineering',
+  'project management',
+  'business administration',
+  'economics',
+  'finance',
+  'marketing',
+  'management',
+  'entrepreneurship',
+  'other'
+]
+
+// Whitelist for "other" field - approved academic/professional fields
+const approvedOtherFields = [
+  'architecture', 'urban planning', 'design', 'art', 'music', 'theater',
+  'literature', 'linguistics', 'philosophy', 'psychology', 'sociology',
+  'political science', 'international relations', 'law', 'medicine',
+  'pharmacy', 'nursing', 'public health', 'education', 'journalism',
+  'communication', 'media studies', 'anthropology', 'history', 'geography',
+  'geology', 'meteorology', 'oceanography', 'astronomy', 'chemistry',
+  'biology', 'biochemistry', 'molecular biology', 'genetics', 'ecology',
+  'agriculture', 'forestry', 'veterinary science', 'food science',
+  'nutrition', 'sports science', 'kinesiology', 'rehabilitation',
+  'social work', 'counseling', 'theology', 'religious studies'
 ]
 
 function InputForm({ onSubmit, loading }) {
@@ -20,7 +73,9 @@ function InputForm({ onSubmit, loading }) {
     researchExperience: '',
     workExperience: '',
     publications: '',
-    recommendationLetters: '0'
+    recommendationLetters: '0',
+    otherBackground: '',
+    otherConfirmed: false
   })
 
   const handleChange = (e) => {
@@ -43,6 +98,12 @@ function InputForm({ onSubmit, loading }) {
   const handleSubmit = (e) => {
     e.preventDefault()
     
+    // "Other" seçildiyse ama confirm edilmediyse uyar
+    if (formData.background.includes('other') && !formData.otherConfirmed) {
+      alert('Lütfen "Other" alanını doldurup onaylayın (✓ butonuna basın)')
+      return
+    }
+    
     if (!formData.gpa || !formData.languageScore || formData.background.length === 0) {
       alert('Lütfen tüm zorunlu alanları doldurun')
       return
@@ -54,7 +115,15 @@ function InputForm({ onSubmit, loading }) {
       return
     }
 
-    onSubmit(formData)
+    // Final background array'i oluştur
+    const finalBackground = formData.background
+      .filter(b => b !== 'other' || formData.otherConfirmed)
+      .map(b => b === 'other' ? formData.otherBackground : b)
+
+    onSubmit({
+      ...formData,
+      background: finalBackground
+    })
   }
 
   return (
@@ -97,16 +166,55 @@ function InputForm({ onSubmit, loading }) {
         <div className="form-section">
           <h2>🎯 Background</h2>
           <div className="background-grid">
-            {backgroundOptions.map(option => (
+            {backgroundOptions.filter(opt => opt !== 'other').map(option => (
               <label key={option} className="checkbox-label">
                 <input
                   type="checkbox"
                   checked={formData.background.includes(option)}
                   onChange={() => handleBackgroundToggle(option)}
                 />
-                <span>{option.charAt(0).toUpperCase() + option.slice(1)}</span>
+                <span>{option.charAt(0).toUpperCase() + option.slice(1).replace(/\b\w/g, l => l.toUpperCase())}</span>
               </label>
             ))}
+          </div>
+          
+          {/* Other option with input */}
+          <div className="other-background-container">
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={formData.background.includes('other')}
+                onChange={() => handleBackgroundToggle('other')}
+              />
+              <span>Other</span>
+            </label>
+            
+            {formData.background.includes('other') && (
+              <div className="other-input-wrapper">
+                <input
+                  type="text"
+                  value={formData.otherBackground}
+                  onChange={handleOtherInputChange}
+                  placeholder="Enter your field (e.g., architecture, psychology)"
+                  className="other-input"
+                  disabled={formData.otherConfirmed}
+                />
+                <button
+                  type="button"
+                  onClick={handleOtherConfirm}
+                  className={`confirm-button ${formData.otherConfirmed ? 'confirmed' : ''}`}
+                  disabled={!formData.otherBackground.trim() || formData.otherConfirmed}
+                >
+                  {formData.otherConfirmed ? '✓' : '✓'}
+                </button>
+              </div>
+            )}
+            
+            {formData.background.includes('other') && formData.otherConfirmed && (
+              <div className="other-confirmed">
+                ✓ Added: <strong>{formData.otherBackground}</strong>
+              </div>
+            )}
           </div>
         </div>
 
