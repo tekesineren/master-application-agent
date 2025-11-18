@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './InputForm.css'
 
 const backgroundOptions = [
@@ -207,7 +207,7 @@ function InputForm({ onSubmit, loading, initialData = null }) {
   const [suggestedBackgrounds, setSuggestedBackgrounds] = useState([])
   
   // Initial data varsa formu doldur (CV'den gelen veriler)
-  useState(() => {
+  useEffect(() => {
     if (initialData) {
       setFormData(prev => ({
         ...prev,
@@ -228,7 +228,7 @@ function InputForm({ onSubmit, loading, initialData = null }) {
         setSuggestedBackgrounds(initialData.background.slice(0, 3))
       }
     }
-  })
+  }, [initialData])
 
   const handleChange = (e) => {
     const { name, value } = e.target
