@@ -397,50 +397,90 @@ function InputForm({ onSubmit, loading }) {
           </div>
 
           <div className="form-group">
-            <label htmlFor="languageTestType">Yabancı Dil Sınavı</label>
+            <label htmlFor="language">Yabancı Dil</label>
             <select
-              id="languageTestType"
-              name="languageTestType"
-              value={formData.languageTestType}
+              id="language"
+              name="language"
+              value={formData.language}
               onChange={(e) => {
                 setFormData(prev => ({
                   ...prev,
-                  languageTestType: e.target.value,
-                  languageTestScore: '' // Sınav değişince skoru sıfırla
+                  language: e.target.value,
+                  languageTestType: '', // Dil değişince sınavı sıfırla
+                  languageTestScore: '' // Skoru da sıfırla
                 }))
               }}
               required
             >
               <option value="">Seçiniz</option>
-              {languageTests.map(test => (
-                <option key={test.value} value={test.value}>{test.label}</option>
+              {languages.map(lang => (
+                <option key={lang.value} value={lang.value}>{lang.label}</option>
               ))}
             </select>
-            <small>Uluslararası kabul gören dil sınavları</small>
+            <small>Başvuru yapacağınız programın gerektirdiği dil</small>
           </div>
 
-          {formData.languageTestType && (
+          {formData.language && (
             <div className="form-group">
-              <label htmlFor="languageTestScore">
-                {languageTests.find(t => t.value === formData.languageTestType)?.label} Skoru
+              <label htmlFor="languageTestType">
+                {languages.find(l => l.value === formData.language)?.label} Dil Sınavı
               </label>
-              <input
-                type="number"
-                id="languageTestScore"
-                name="languageTestScore"
-                value={formData.languageTestScore}
-                onChange={handleChange}
-                step={languageTests.find(t => t.value === formData.languageTestType)?.step || 1}
-                min={languageTests.find(t => t.value === formData.languageTestType)?.min || 0}
-                max={languageTests.find(t => t.value === formData.languageTestType)?.max || 120}
-                placeholder={languageTests.find(t => t.value === formData.languageTestType)?.placeholder || 'Skor'}
+              <select
+                id="languageTestType"
+                name="languageTestType"
+                value={formData.languageTestType}
+                onChange={(e) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    languageTestType: e.target.value,
+                    languageTestScore: '' // Sınav değişince skoru sıfırla
+                  }))
+                }}
                 required
-              />
+              >
+                <option value="">Seçiniz</option>
+                {(() => {
+                  const countryTests = languageTestsByCountry[formData.country] || languageTestsByCountry['other']
+                  const languageTests = countryTests[formData.language] || countryTests['english'] || []
+                  return languageTests.map(test => (
+                    <option key={test.value} value={test.value}>{test.label}</option>
+                  ))
+                })()}
+              </select>
               <small>
-                {languageTests.find(t => t.value === formData.languageTestType)?.description}
+                {formData.country === 'turkey' && formData.language === 'english' 
+                  ? 'Türkiye\'de en çok kabul gören İngilizce sınavları'
+                  : `${countries.find(c => c.value === formData.country)?.label} ülkesinde ${languages.find(l => l.value === formData.language)?.label} için kabul gören sınavlar`}
               </small>
             </div>
           )}
+
+          {formData.languageTestType && (() => {
+            const countryTests = languageTestsByCountry[formData.country] || languageTestsByCountry['other']
+            const languageTests = countryTests[formData.language] || countryTests['english'] || []
+            const selectedTest = languageTests.find(t => t.value === formData.languageTestType)
+            
+            return selectedTest ? (
+              <div className="form-group">
+                <label htmlFor="languageTestScore">
+                  {selectedTest.label} Skoru
+                </label>
+                <input
+                  type="number"
+                  id="languageTestScore"
+                  name="languageTestScore"
+                  value={formData.languageTestScore}
+                  onChange={handleChange}
+                  step={selectedTest.step || 1}
+                  min={selectedTest.min || 0}
+                  max={selectedTest.max || 120}
+                  placeholder={selectedTest.placeholder || 'Skor'}
+                  required
+                />
+                <small>{selectedTest.description}</small>
+              </div>
+            ) : null
+          })()}
         </div>
 
         <div className="form-section">
