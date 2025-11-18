@@ -341,6 +341,8 @@ def match_universities():
         }), 400
 
 if __name__ == '__main__':
+    # Railway ve Render.com için PORT environment variable kullan
+    port = int(os.environ.get('PORT', 5000))
     # Geliştirme için debug mode açık
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=port)
 
