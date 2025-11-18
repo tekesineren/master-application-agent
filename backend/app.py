@@ -223,14 +223,48 @@ UNIVERSITIES = [
     }
 ]
 
+def convert_gpa_to_4_0(gpa, grading_system):
+    """
+    Farklı notlandırma sistemlerini 4.0 GPA sistemine dönüştürür
+    """
+    if not gpa or gpa == 0:
+        return 0.0
+    
+    grading_system = grading_system or '4.0'
+    
+    if grading_system == '4.0':
+        return float(gpa)
+    elif grading_system == '100':
+        # 100'lük sistemden 4.0'a: (Not / 100) * 4.0
+        return (float(gpa) / 100.0) * 4.0
+    elif grading_system == 'uk':
+        # UK sistemi: 70+ = First (3.7-4.0), 60-69 = Upper Second (3.0-3.6), 50-59 = Lower Second (2.0-2.9), <50 = Third (0-1.9)
+        if gpa >= 70:
+            return min(4.0, 3.7 + ((gpa - 70) / 30.0) * 0.3)
+        elif gpa >= 60:
+            return 3.0 + ((gpa - 60) / 10.0) * 0.6
+        elif gpa >= 50:
+            return 2.0 + ((gpa - 50) / 10.0) * 0.9
+        else:
+            return (gpa / 50.0) * 1.9
+    elif grading_system == 'german':
+        # Alman sistemi: 1.0 en iyi, 4.0 en kötü - ters çevir
+        return 5.0 - float(gpa)  # 1.0 -> 4.0, 2.0 -> 3.0, 3.0 -> 2.0, 4.0 -> 1.0
+    elif grading_system == 'french':
+        # Fransız sistemi: 0-20, 20 en iyi - (Not / 20) * 4.0
+        return (float(gpa) / 20.0) * 4.0
+    else:
+        # Diğer sistemler için varsayılan olarak 100'lük sistem kabul et
+        return (float(gpa) / 100.0) * 4.0
+
 def calculate_entrance_exam_bonus(user_data):
     """
     Giriş sınavı bazlı ek puan hesaplar (Türkiye ÖSYM sistemi)
     """
-    entrance_exam_type = user_data.get('entrance_exam_type', '')
     entrance_exam_rank = user_data.get('entrance_exam_rank')
+    country = user_data.get('country', '')
     
-    if entrance_exam_type == 'osym' and entrance_exam_rank:
+    if country == 'turkey' and entrance_exam_rank:
         rank = int(entrance_exam_rank)
         if rank <= 10000:
             return 0.0  # Zaten yüksek, ek puan gerekmez
@@ -318,15 +352,18 @@ def calculate_bonus_points(user_data):
 
 def calculate_minimum_gpa_requirement(user_data):
     """
-    Ülke ve giriş sınavı bazlı minimum GPA gereksinimini hesaplar
+    Ülke ve giriş sınavı bazlı minimum GPA gereksinimini hesaplar (4.0 sisteminde)
     """
     gpa = user_data.get('gpa', 0)
+    grading_system = user_data.get('grading_system', '4.0')
     country = user_data.get('country', 'turkey')
-    entrance_exam_type = user_data.get('entrance_exam_type', '')
     entrance_exam_rank = user_data.get('entrance_exam_rank')
     
+    # GPA'yi 4.0 sistemine dönüştür
+    gpa_4_0 = convert_gpa_to_4_0(gpa, grading_system)
+    
     # Türkiye için ÖSYM sistemi
-    if country == 'turkey' and entrance_exam_type == 'osym' and entrance_exam_rank:
+    if country == 'turkey' and entrance_exam_rank:
         rank = int(entrance_exam_rank)
         entrance_bonus = calculate_entrance_exam_bonus(user_data)
         bonus_points = calculate_bonus_points(user_data)
@@ -372,22 +409,26 @@ def calculate_match_score(user_data, university):
     score = 0.0
     max_score = 100.0
     
-    # Minimum GPA kontrolü
+    # GPA'yi 4.0 sistemine dönüştür
     gpa = user_data.get('gpa', 0)
+    grading_system = user_data.get('grading_system', '4.0')
+    gpa_4_0 = convert_gpa_to_4_0(gpa, grading_system)
+    
+    # Minimum GPA kontrolü
     min_gpa_req = calculate_minimum_gpa_requirement(user_data)
     
     # 10+ yıl iş deneyimi varsa minimum GPA şartı yok
     work_exp = user_data.get('work_experience', 0)
-    if work_exp < 10 and gpa < min_gpa_req:
+    if work_exp < 10 and gpa_4_0 < min_gpa_req:
         # Minimum GPA'nin altındaysa çok düşük puan
         return 20.0  # Çok düşük uyum
     
-    # 1. GPA değerlendirmesi (30 puan)
-    if gpa >= university['min_gpa']:
-        gpa_score = min(30, (gpa / 4.0) * 30)
+    # 1. GPA değerlendirmesi (30 puan) - 4.0 sisteminde
+    if gpa_4_0 >= university['min_gpa']:
+        gpa_score = min(30, (gpa_4_0 / 4.0) * 30)
         score += gpa_score
     else:
-        score += (gpa / university['min_gpa']) * 15
+        score += (gpa_4_0 / university['min_gpa']) * 15
     
     # Üniversite sıralaması bonusu (GPA'ya eklenir)
     undergrad_ranking = user_data.get('undergraduate_university_ranking', '')

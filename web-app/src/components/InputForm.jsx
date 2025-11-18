@@ -66,14 +66,22 @@ const approvedOtherFields = [
 ]
 
 const countries = [
-  { value: 'turkey', label: 'Türkiye', examType: 'osym' },
-  { value: 'usa', label: 'USA', examType: 'sat' },
-  { value: 'uk', label: 'UK', examType: 'a-levels' },
-  { value: 'germany', label: 'Germany', examType: 'abitur' },
-  { value: 'china', label: 'China', examType: 'gaokao' },
-  { value: 'france', label: 'France', examType: 'baccalaureat' },
-  { value: 'other', label: 'Other', examType: 'other' }
+  { value: 'turkey', label: 'Türkiye', gradingSystem: '100' },
+  { value: 'usa', label: 'USA', gradingSystem: '4.0' },
+  { value: 'uk', label: 'UK', gradingSystem: 'uk' },
+  { value: 'germany', label: 'Germany', gradingSystem: 'german' },
+  { value: 'france', label: 'France', gradingSystem: 'french' },
+  { value: 'other', label: 'Other', gradingSystem: 'other' }
 ]
+
+const gradingSystems = {
+  '4.0': { label: '4.0 GPA Sistemi', min: 0, max: 4.0, step: 0.01, placeholder: '3.5' },
+  '100': { label: '100\'lük Sistem', min: 0, max: 100, step: 1, placeholder: '85' },
+  'uk': { label: 'UK Sistemi (First/Upper Second/Lower Second/Third)', min: 0, max: 100, step: 1, placeholder: '70 (Upper Second)' },
+  'german': { label: 'Alman Sistemi (1.0-4.0, 1.0 en iyi)', min: 1.0, max: 4.0, step: 0.1, placeholder: '2.0' },
+  'french': { label: 'Fransız Sistemi (0-20, 20 en iyi)', min: 0, max: 20, step: 0.1, placeholder: '15' },
+  'other': { label: 'Diğer', min: 0, max: 100, step: 0.01, placeholder: 'Not ortalaması' }
+}
 
 function InputForm({ onSubmit, loading }) {
   const [formData, setFormData] = useState({
@@ -87,8 +95,7 @@ function InputForm({ onSubmit, loading }) {
     otherBackground: '',
     otherConfirmed: false,
     country: 'turkey',
-    entranceExamType: 'osym',
-    entranceExamScore: '',
+    gradingSystem: '100',
     entranceExamRank: '',
     undergraduateUniversityRanking: '',
     greScore: '',
@@ -96,8 +103,12 @@ function InputForm({ onSubmit, loading }) {
     projectExperience: '',
     competitionAchievements: '',
     hasMastersDegree: false,
-    mastersUniversityRanking: ''
+    mastersUniversityRanking: '',
+    cvSuggestedBackgrounds: [] // CV'den gelen öneriler
   })
+  
+  // CV'den gelen önerileri simüle et (gerçekte CV parse edilecek)
+  const [suggestedBackgrounds, setSuggestedBackgrounds] = useState([])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -223,7 +234,7 @@ function InputForm({ onSubmit, loading }) {
                 setFormData(prev => ({
                   ...prev,
                   country: e.target.value,
-                  entranceExamType: selectedCountry?.examType || 'other'
+                  gradingSystem: selectedCountry?.gradingSystem || 'other'
                 }))
               }}
             >
@@ -235,45 +246,46 @@ function InputForm({ onSubmit, loading }) {
           </div>
 
           <div className="form-group">
-            <label htmlFor="gpa">GPA / Not Ortalaması (0-4.0)</label>
+            <label htmlFor="gradingSystem">Notlandırma Sistemi</label>
+            <select
+              id="gradingSystem"
+              name="gradingSystem"
+              value={formData.gradingSystem}
+              onChange={(e) => {
+                setFormData(prev => ({
+                  ...prev,
+                  gradingSystem: e.target.value,
+                  gpa: '' // Sistem değişince notu sıfırla
+                }))
+              }}
+            >
+              {Object.entries(gradingSystems).map(([key, system]) => (
+                <option key={key} value={key}>{system.label}</option>
+              ))}
+            </select>
+            <small>Üniversitenizin kullandığı notlandırma sistemi</small>
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="gpa">Not Ortalaması</label>
             <input
               type="number"
               id="gpa"
               name="gpa"
               value={formData.gpa}
               onChange={handleChange}
-              step="0.01"
-              min="0"
-              max="4.0"
-              placeholder="3.5"
+              step={gradingSystems[formData.gradingSystem]?.step || 0.01}
+              min={gradingSystems[formData.gradingSystem]?.min || 0}
+              max={gradingSystems[formData.gradingSystem]?.max || 100}
+              placeholder={gradingSystems[formData.gradingSystem]?.placeholder || 'Not ortalaması'}
               required
             />
-            <small>4.00 üzerinden lisans mezuniyet not ortalaması</small>
+            <small>{gradingSystems[formData.gradingSystem]?.label}</small>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="entranceExamType">Giriş Sınavı Türü</label>
-            <select
-              id="entranceExamType"
-              name="entranceExamType"
-              value={formData.entranceExamType}
-              onChange={handleChange}
-            >
-              <option value="osym">ÖSYM (Türkiye)</option>
-              <option value="sat">SAT (USA)</option>
-              <option value="gre">GRE</option>
-              <option value="gmat">GMAT</option>
-              <option value="a-levels">A-Levels (UK)</option>
-              <option value="abitur">Abitur (Germany)</option>
-              <option value="gaokao">Gaokao (China)</option>
-              <option value="baccalaureat">Baccalauréat (France)</option>
-              <option value="other">Diğer / Yok</option>
-            </select>
-          </div>
-
-          {formData.entranceExamType === 'osym' && (
+          {formData.country === 'turkey' && (
             <div className="form-group">
-              <label htmlFor="entranceExamRank">ÖSYM Sıralaması</label>
+              <label htmlFor="entranceExamRank">ÖSYM Sıralaması (Opsiyonel)</label>
               <input
                 type="number"
                 id="entranceExamRank"
@@ -283,26 +295,7 @@ function InputForm({ onSubmit, loading }) {
                 min="1"
                 placeholder="15000"
               />
-              <small>Örn: 15000 (sıralama)</small>
-            </div>
-          )}
-
-          {(formData.entranceExamType === 'sat' || formData.entranceExamType === 'gre' || formData.entranceExamType === 'gmat') && (
-            <div className="form-group">
-              <label htmlFor="entranceExamScore">
-                {formData.entranceExamType === 'sat' ? 'SAT Skoru' : 
-                 formData.entranceExamType === 'gre' ? 'GRE Skoru' : 'GMAT Skoru'}
-              </label>
-              <input
-                type="number"
-                id="entranceExamScore"
-                name="entranceExamScore"
-                value={formData.entranceExamScore}
-                onChange={handleChange}
-                min="0"
-                placeholder={formData.entranceExamType === 'sat' ? '1500' : 
-                             formData.entranceExamType === 'gre' ? '320' : '700'}
-              />
+              <small>Örn: 15000 (sıralama) - Türkiye için ek değerlendirme</small>
             </div>
           )}
 
@@ -345,22 +338,62 @@ function InputForm({ onSubmit, loading }) {
 
         <div className="form-section">
           <h2>🎯 Background</h2>
-          <div className="background-grid">
-            {backgroundOptions.filter(opt => opt !== 'other').map(option => (
-              <label key={option} className="checkbox-label">
-                <input
-                  type="checkbox"
-                  checked={formData.background.includes(option)}
-                  onChange={() => handleBackgroundToggle(option)}
-                />
-                <span>{option.charAt(0).toUpperCase() + option.slice(1).replace(/\b\w/g, l => l.toUpperCase())}</span>
-              </label>
-            ))}
-          </div>
           
-          {/* Other option with input */}
-          <div className="other-background-container">
-            <label className="checkbox-label">
+          {/* CV Upload (simüle edilmiş - gerçekte CV parse edilecek) */}
+          <div className="cv-upload-section" style={{ marginBottom: '20px', padding: '15px', background: '#f5f5f5', borderRadius: '8px' }}>
+            <label htmlFor="cvUpload" style={{ display: 'block', marginBottom: '10px', fontWeight: '500' }}>
+              📄 CV Yükle (Opsiyonel)
+            </label>
+            <input
+              type="file"
+              id="cvUpload"
+              accept=".pdf,.doc,.docx"
+              onChange={(e) => {
+                const file = e.target.files[0]
+                if (file) {
+                  // Simüle edilmiş CV parsing - gerçekte backend'de yapılacak
+                  // Şimdilik rastgele 3 öneri göster
+                  const randomSuggestions = backgroundOptions
+                    .filter(opt => opt !== 'other')
+                    .sort(() => Math.random() - 0.5)
+                    .slice(0, 3)
+                  setSuggestedBackgrounds(randomSuggestions)
+                  // Otomatik seç
+                  setFormData(prev => ({
+                    ...prev,
+                    background: [...new Set([...prev.background, ...randomSuggestions])]
+                  }))
+                }
+              }}
+              style={{ display: 'block', marginBottom: '10px' }}
+            />
+            <small style={{ color: '#666' }}>
+              CV'nizden otomatik olarak 3 alan önerilecek (mavi renkte gösterilecek)
+            </small>
+          </div>
+
+          <div className="background-grid">
+            {backgroundOptions.filter(opt => opt !== 'other').map(option => {
+              const isSuggested = suggestedBackgrounds.includes(option)
+              const isSelected = formData.background.includes(option)
+              return (
+                <label 
+                  key={option} 
+                  className={`checkbox-label ${isSuggested ? 'suggested' : ''} ${isSelected ? 'selected' : ''}`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={() => handleBackgroundToggle(option)}
+                  />
+                  <span>{option.charAt(0).toUpperCase() + option.slice(1).replace(/\b\w/g, l => l.toUpperCase())}</span>
+                  {isSuggested && <span className="suggested-badge">CV</span>}
+                </label>
+              )
+            })}
+            
+            {/* Other option - grid içinde en sonda */}
+            <label className={`checkbox-label ${formData.background.includes('other') ? 'selected' : ''}`}>
               <input
                 type="checkbox"
                 checked={formData.background.includes('other')}
@@ -368,34 +401,35 @@ function InputForm({ onSubmit, loading }) {
               />
               <span>Other</span>
             </label>
-            
-            {formData.background.includes('other') && (
-              <div className="other-input-wrapper">
-                <input
-                  type="text"
-                  value={formData.otherBackground}
-                  onChange={handleOtherInputChange}
-                  placeholder="Enter your field (e.g., architecture, psychology)"
-                  className="other-input"
-                  disabled={formData.otherConfirmed}
-                />
-                <button
-                  type="button"
-                  onClick={handleOtherConfirm}
-                  className={`confirm-button ${formData.otherConfirmed ? 'confirmed' : ''}`}
-                  disabled={!formData.otherBackground.trim() || formData.otherConfirmed}
-                >
-                  {formData.otherConfirmed ? '✓' : '✓'}
-                </button>
-              </div>
-            )}
-            
-            {formData.background.includes('other') && formData.otherConfirmed && (
-              <div className="other-confirmed">
-                ✓ Added: <strong>{formData.otherBackground}</strong>
-              </div>
-            )}
           </div>
+          
+          {/* Other input - sadece seçildiğinde göster */}
+          {formData.background.includes('other') && (
+            <div className="other-input-wrapper" style={{ marginTop: '15px' }}>
+              <input
+                type="text"
+                value={formData.otherBackground}
+                onChange={handleOtherInputChange}
+                placeholder="Enter your field (e.g., architecture, psychology)"
+                className="other-input"
+                disabled={formData.otherConfirmed}
+              />
+              <button
+                type="button"
+                onClick={handleOtherConfirm}
+                className={`confirm-button ${formData.otherConfirmed ? 'confirmed' : ''}`}
+                disabled={!formData.otherBackground.trim() || formData.otherConfirmed}
+              >
+                {formData.otherConfirmed ? '✓' : '✓'}
+              </button>
+            </div>
+          )}
+          
+          {formData.background.includes('other') && formData.otherConfirmed && (
+            <div className="other-confirmed" style={{ marginTop: '10px' }}>
+              ✓ Added: <strong>{formData.otherBackground}</strong>
+            </div>
+          )}
         </div>
 
         <div className="form-section">

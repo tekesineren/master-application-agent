@@ -96,11 +96,39 @@
   font-weight: 600;
 }
 
-.other-background-container {
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 2px solid #e0e0e0;
+.checkbox-label.suggested {
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  border: 2px solid #2196f3;
+  position: relative;
 }
+
+.checkbox-label.suggested.selected {
+  background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+  border-color: #1565c0;
+}
+
+.checkbox-label.suggested.selected span {
+  color: white;
+}
+
+.suggested-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #2196f3;
+  color: white;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.checkbox-label.selected {
+  background: #e8eaf6;
+  border: 2px solid #667eea;
+}
+
+/* Other container artık grid içinde, bu stil kaldırıldı */
 
 .other-input-wrapper {
   display: flex;
