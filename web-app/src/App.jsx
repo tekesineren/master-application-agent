@@ -118,21 +118,21 @@ function App() {
     setCvData(null)
   }
 
-  const handleCVUpload = async (file) => {
-    // Simüle edilmiş CV parsing - gerçekte backend'de yapılacak
-    const simulatedData = {
-      gpa: (Math.random() * 1.5 + 2.5).toFixed(2), // 2.5-4.0
-      language: 'english',
-      languageTestType: 'toefl',
-      languageTestScore: (Math.random() * 30 + 80).toFixed(0), // 80-110
-      background: ['computer science', 'engineering', 'data science'],
-      researchExperience: (Math.random() * 2).toFixed(1),
-      workExperience: (Math.random() * 3).toFixed(1),
-      publications: Math.floor(Math.random() * 5),
-      country: 'turkey',
-      gradingSystem: '4.0',
-      recommendationLetters: Math.floor(Math.random() * 3) + 1,
-      undergraduateUniversityRanking: 'top1000',
+  const handleCVUpload = async (file, extractedData = {}) => {
+    // Backend'den gelen verileri kullan veya fallback
+    const cvData = {
+      gpa: extractedData.gpa ? parseFloat(extractedData.gpa).toFixed(2) : '',
+      language: extractedData.language || 'english',
+      languageTestType: extractedData.language_test_type || '',
+      languageTestScore: extractedData.language_test_score ? parseFloat(extractedData.language_test_score).toFixed(0) : '',
+      background: extractedData.background || [],
+      researchExperience: extractedData.research_experience ? parseFloat(extractedData.research_experience).toFixed(1) : '0',
+      workExperience: extractedData.work_experience ? parseFloat(extractedData.work_experience).toFixed(1) : '0',
+      publications: extractedData.publications || 0,
+      country: extractedData.country || 'turkey',
+      gradingSystem: extractedData.grading_system || '4.0',
+      recommendationLetters: '0',
+      undergraduateUniversityRanking: '',
       greScore: null,
       gmatScore: null,
       projectExperience: 'none',
@@ -141,13 +141,25 @@ function App() {
       mastersUniversityRanking: ''
     }
 
-    setCvData(simulatedData)
+    setCvData(cvData)
     setShowCVUpload(false)
+    
+    // Eksik bilgiler varsa kullanıcıya göster
+    const missingFields = []
+    if (!cvData.gpa) missingFields.push('GPA')
+    if (!cvData.languageTestScore) missingFields.push('Dil Skoru')
+    if (cvData.background.length === 0) missingFields.push('Background')
+    
+    if (missingFields.length > 0) {
+      alert(`CV'nizden bazı bilgiler çıkarılamadı:\n${missingFields.join(', ')}\n\nLütfen bu bilgileri manuel olarak girin.`)
+      setShowForm(true)
+      return
+    }
     
     // Otomatik analiz ve sonuçları göster
     setTimeout(() => {
-      handleSubmit(simulatedData)
-    }, 2000)
+      handleSubmit(cvData)
+    }, 1000)
   }
 
   const handleManualEntry = () => {

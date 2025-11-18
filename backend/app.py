@@ -7,6 +7,18 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import json
 import os
+import re
+import io
+try:
+    import PyPDF2
+    PDF_AVAILABLE = True
+except ImportError:
+    PDF_AVAILABLE = False
+try:
+    from docx import Document
+    DOCX_AVAILABLE = True
+except ImportError:
+    DOCX_AVAILABLE = False
 
 app = Flask(__name__)
 
@@ -539,6 +551,256 @@ def calculate_match_score(user_data, university):
     
     # Maksimum 110 puan olabilir (100 + 10 bonus)
     return round(min(score, 110.0), 2)
+
+def extract_text_from_pdf(file_content):
+    """PDF'den text çıkar"""
+    try:
+        pdf_file = io.BytesIO(file_content)
+        pdf_reader = PyPDF2.PdfReader(pdf_file)
+        text = ""
+        for page in pdf_reader.pages:
+            text += page.extract_text() + "\n"
+        return text
+    except Exception as e:
+        print(f"PDF parsing error: {e}")
+        return None
+
+def extract_text_from_docx(file_content):
+    """DOCX'den text çıkar"""
+    try:
+        doc_file = io.BytesIO(file_content)
+        doc = Document(doc_file)
+        text = "\n".join([paragraph.text for paragraph in doc.paragraphs])
+        return text
+    except Exception as e:
+        print(f"DOCX parsing error: {e}")
+        return None
+
+def parse_cv_content(text):
+    """CV text'inden bilgileri çıkar"""
+    if not text:
+        return {}
+    
+    text_lower = text.lower()
+    extracted_data = {}
+    
+    # GPA extraction
+    gpa_patterns = [
+        r'gpa[:\s]+([0-9]+\.[0-9]+)',
+        r'grade point average[:\s]+([0-9]+\.[0-9]+)',
+        r'not ortalaması[:\s]+([0-9]+\.[0-9]+)',
+        r'([0-9]\.[0-9]+)\s*/\s*4\.0',
+        r'([0-9]\.[0-9]+)\s*out of\s*4\.0'
+    ]
+    for pattern in gpa_patterns:
+        match = re.search(pattern, text_lower, re.IGNORECASE)
+        if match:
+            gpa = float(match.group(1))
+            if 0 <= gpa <= 4.0:
+                extracted_data['gpa'] = gpa
+                break
+    
+    # Language scores
+    toefl_pattern = r'toefl[:\s]+(\d{2,3})'
+    ielts_pattern = r'ielts[:\s]+(\d\.\d)'
+    yds_pattern = r'yds[:\s]+(\d{2,3})'
+    
+    if re.search(toefl_pattern, text_lower, re.IGNORECASE):
+        match = re.search(toefl_pattern, text_lower, re.IGNORECASE)
+        if match:
+            score = int(match.group(1))
+            if 0 <= score <= 120:
+                extracted_data['language_test_type'] = 'toefl'
+                extracted_data['language_test_score'] = score
+    
+    if re.search(ielts_pattern, text_lower, re.IGNORECASE):
+        match = re.search(ielts_pattern, text_lower, re.IGNORECASE)
+        if match:
+            score = float(match.group(1))
+            if 0 <= score <= 9:
+                extracted_data['language_test_type'] = 'ielts'
+                extracted_data['language_test_score'] = score
+    
+    if re.search(yds_pattern, text_lower, re.IGNORECASE):
+        match = re.search(yds_pattern, text_lower, re.IGNORECASE)
+        if match:
+            score = int(match.group(1))
+            if 0 <= score <= 100:
+                extracted_data['language_test_type'] = 'yds'
+                extracted_data['language_test_score'] = score
+    
+    # Background fields extraction
+    background_keywords = {
+        'computer science': ['computer science', 'cs', 'bilgisayar'],
+        'engineering': ['engineering', 'mühendislik'],
+        'robotics': ['robotics', 'robotik'],
+        'data science': ['data science', 'veri bilimi'],
+        'mechanical engineering': ['mechanical engineering', 'makine mühendisliği'],
+        'electrical engineering': ['electrical engineering', 'elektrik mühendisliği'],
+        'mathematics': ['mathematics', 'matematik'],
+        'physics': ['physics', 'fizik']
+    }
+    
+    found_backgrounds = []
+    for field, keywords in background_keywords.items():
+        for keyword in keywords:
+            if keyword in text_lower:
+                found_backgrounds.append(field)
+                break
+    
+    if found_backgrounds:
+        extracted_data['background'] = list(set(found_backgrounds))
+    
+    # Research experience
+    research_patterns = [
+        r'research[:\s]+(\d+\.?\d*)\s*(?:year|yıl)',
+        r'araştırma[:\s]+(\d+\.?\d*)\s*(?:year|yıl)',
+        r'(\d+\.?\d*)\s*(?:year|yıl).*research'
+    ]
+    for pattern in research_patterns:
+        match = re.search(pattern, text_lower, re.IGNORECASE)
+        if match:
+            extracted_data['research_experience'] = float(match.group(1))
+            break
+    
+    # Work experience
+    work_patterns = [
+        r'work experience[:\s]+(\d+\.?\d*)\s*(?:year|yıl)',
+        r'experience[:\s]+(\d+\.?\d*)\s*(?:year|yıl)',
+        r'(\d+\.?\d*)\s*(?:year|yıl).*experience',
+        r'(\d+)\s*(?:year|yıl).*work'
+    ]
+    for pattern in work_patterns:
+        match = re.search(pattern, text_lower, re.IGNORECASE)
+        if match:
+            extracted_data['work_experience'] = float(match.group(1))
+            break
+    
+    # Publications
+    pub_patterns = [
+        r'(\d+)\s*(?:publication|yayın|paper|makale)',
+        r'publication[:\s]+(\d+)',
+        r'(\d+)\s*published'
+    ]
+    for pattern in pub_patterns:
+        match = re.search(pattern, text_lower, re.IGNORECASE)
+        if match:
+            extracted_data['publications'] = int(match.group(1))
+            break
+    
+    # Country detection
+    if 'türkiye' in text_lower or 'turkey' in text_lower:
+        extracted_data['country'] = 'turkey'
+    elif 'usa' in text_lower or 'united states' in text_lower:
+        extracted_data['country'] = 'usa'
+    elif 'germany' in text_lower or 'almanya' in text_lower:
+        extracted_data['country'] = 'germany'
+    elif 'france' in text_lower or 'fransa' in text_lower:
+        extracted_data['country'] = 'france'
+    elif 'uk' in text_lower or 'united kingdom' in text_lower:
+        extracted_data['country'] = 'uk'
+    
+    # Default values
+    if 'gpa' not in extracted_data:
+        extracted_data['gpa'] = None
+    if 'language_test_type' not in extracted_data:
+        extracted_data['language_test_type'] = None
+    if 'language_test_score' not in extracted_data:
+        extracted_data['language_test_score'] = None
+    if 'background' not in extracted_data:
+        extracted_data['background'] = []
+    if 'research_experience' not in extracted_data:
+        extracted_data['research_experience'] = 0
+    if 'work_experience' not in extracted_data:
+        extracted_data['work_experience'] = 0
+    if 'publications' not in extracted_data:
+        extracted_data['publications'] = 0
+    if 'country' not in extracted_data:
+        extracted_data['country'] = 'turkey'
+    
+    extracted_data['grading_system'] = '4.0'
+    extracted_data['language'] = 'english'
+    
+    return extracted_data
+
+@app.route('/api/parse-cv', methods=['POST'])
+def parse_cv():
+    """CV dosyasını parse et ve bilgileri çıkar"""
+    try:
+        if 'cv' not in request.files:
+            return jsonify({
+                "success": False,
+                "error": "CV dosyası bulunamadı"
+            }), 400
+        
+        file = request.files['cv']
+        
+        if file.filename == '':
+            return jsonify({
+                "success": False,
+                "error": "Dosya seçilmedi"
+            }), 400
+        
+        # Dosya tipi kontrolü
+        file_type = file.content_type
+        file_content = file.read()
+        
+        # Text extraction
+        text = None
+        if file_type == 'application/pdf':
+            if not PDF_AVAILABLE:
+                return jsonify({
+                    "success": False,
+                    "error": "PDF parsing kütüphanesi yüklü değil"
+                }), 500
+            text = extract_text_from_pdf(file_content)
+        elif file_type in ['application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword']:
+            if not DOCX_AVAILABLE:
+                return jsonify({
+                    "success": False,
+                    "error": "DOCX parsing kütüphanesi yüklü değil"
+                }), 500
+            text = extract_text_from_docx(file_content)
+        else:
+            return jsonify({
+                "success": False,
+                "error": "Desteklenmeyen dosya formatı. PDF veya DOCX yükleyin."
+            }), 400
+        
+        if not text or len(text.strip()) < 50:
+            return jsonify({
+                "success": False,
+                "error": "CV içeriği çıkarılamadı veya çok kısa. Lütfen geçerli bir CV yükleyin."
+            }), 400
+        
+        # CV içeriği validasyonu
+        text_lower = text.lower()
+        cv_keywords = ['education', 'eğitim', 'experience', 'deneyim', 'skill', 'beceri', 
+                      'university', 'üniversite', 'gpa', 'not', 'work', 'iş']
+        found_keywords = [kw for kw in cv_keywords if kw in text_lower]
+        
+        if len(found_keywords) < 3:
+            return jsonify({
+                "success": False,
+                "error": "Bu dosya bir CV gibi görünmüyor. Lütfen geçerli bir CV yükleyin."
+            }), 400
+        
+        # Bilgileri çıkar
+        extracted_data = parse_cv_content(text)
+        
+        return jsonify({
+            "success": True,
+            "extracted_text": text[:500],  # İlk 500 karakter (debug için)
+            "extracted_data": extracted_data,
+            "confidence": len(found_keywords) / len(cv_keywords)
+        })
+        
+    except Exception as e:
+        print(f"CV parsing error: {e}")
+        return jsonify({
+            "success": False,
+            "error": f"CV analiz edilirken hata oluştu: {str(e)}"
+        }), 500
 
 @app.route('/api/health', methods=['GET'])
 def health_check():

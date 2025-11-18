@@ -1,9 +1,12 @@
 import { useState, useRef } from 'react'
+import { validateCVFile, extractTextFromFile, validateCVContent } from '../utils/cvParser'
 import './CVUpload.css'
 
 function CVUpload({ onCVUpload, onManualEntry }) {
   const [isDragging, setIsDragging] = useState(false)
   const [uploadedFile, setUploadedFile] = useState(null)
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [error, setError] = useState(null)
   const fileInputRef = useRef(null)
 
   const handleDragEnter = (e) => {
@@ -41,17 +44,61 @@ function CVUpload({ onCVUpload, onManualEntry }) {
     }
   }
 
-  const handleFile = (file) => {
-    if (file.type === 'application/pdf' || 
-        file.type === 'application/msword' || 
-        file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
-      setUploadedFile(file)
-      // Simüle edilmiş CV parsing - gerçekte backend'de yapılacak
-      setTimeout(() => {
-        onCVUpload(file)
-      }, 500)
-    } else {
-      alert('Lütfen PDF, DOC veya DOCX formatında bir dosya yükleyin')
+  const handleFile = async (file) => {
+    setError(null)
+    
+    // 1. Dosya validasyonu
+    const validation = validateCVFile(file)
+    if (!validation.valid) {
+      setError(validation.error)
+      return
+    }
+    
+    setIsProcessing(true)
+    setUploadedFile(file)
+    
+    try {
+      // 2. Dosyayı backend'e gönder ve parse et
+      const formData = new FormData()
+      formData.append('cv', file)
+      
+      const apiUrl = import.meta.env.VITE_API_URL || 
+        (import.meta.env.DEV ? '/api' : 'https://master-application-agent-production.up.railway.app/api')
+      
+      const response = await fetch(`${apiUrl}/parse-cv`, {
+        method: 'POST',
+        body: formData
+      })
+      
+      if (!response.ok) {
+        throw new Error('CV analiz edilemedi')
+      }
+      
+      const data = await response.json()
+      
+      if (!data.success) {
+        throw new Error(data.error || 'CV içeriği analiz edilemedi')
+      }
+      
+      // 3. CV içeriği validasyonu
+      if (data.extracted_text) {
+        const contentValidation = validateCVContent(data.extracted_text)
+        if (!contentValidation.valid) {
+          setError(contentValidation.error)
+          setUploadedFile(null)
+          setIsProcessing(false)
+          return
+        }
+      }
+      
+      // 4. Başarılı - CV verilerini gönder
+      onCVUpload(file, data.extracted_data || {})
+      
+    } catch (err) {
+      console.error('CV parsing error:', err)
+      setError(err.message || 'CV analiz edilirken bir hata oluştu. Lütfen manuel giriş yapın.')
+      setUploadedFile(null)
+      setIsProcessing(false)
     }
   }
 
@@ -101,9 +148,23 @@ function CVUpload({ onCVUpload, onManualEntry }) {
                 <polyline points="22 4 12 14.01 9 11.01"></polyline>
               </svg>
             </div>
-            <h2>CV Başarıyla Yüklendi!</h2>
+            <h2>{isProcessing ? 'CV Analiz Ediliyor...' : 'CV Başarıyla Yüklendi!'}</h2>
             <p className="file-name">{uploadedFile.name}</p>
-            <p className="processing">Bilgileriniz analiz ediliyor...</p>
+            <p className="processing">
+              {isProcessing ? 'CV içeriği çıkarılıyor ve doğrulanıyor...' : 'Bilgileriniz analiz ediliyor...'}
+            </p>
+            {error && (
+              <div className="error-message-cv" style={{ 
+                marginTop: '15px', 
+                padding: '10px', 
+                background: '#fee2e2', 
+                color: '#dc2626', 
+                borderRadius: '8px',
+                fontSize: '0.9rem'
+              }}>
+                ⚠️ {error}
+              </div>
+            )}
           </>
         )}
       </div>
