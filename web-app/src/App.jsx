@@ -40,7 +40,10 @@ function App() {
             }).catch(() => {}) // Health check hatası önemsiz
           }
           
-          // Ana istek
+          // Ana istek (60 saniye timeout)
+          const controller = new AbortController()
+          const timeoutId = setTimeout(() => controller.abort(), 60000)
+          
           response = await fetch(`${apiUrl}/match`, {
             method: 'POST',
             headers: {
@@ -52,8 +55,10 @@ function App() {
               motivation_letter: formData.motivationLetter,
               background: formData.background
             }),
-            signal: AbortSignal.timeout(60000) // 60 saniye timeout
+            signal: controller.signal
           })
+          
+          clearTimeout(timeoutId)
 
           if (response.ok) {
             break // Başarılı, retry döngüsünden çık
