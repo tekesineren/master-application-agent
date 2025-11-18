@@ -64,11 +64,12 @@ function CVUpload({ onCVUpload, onManualEntry }) {
       const formData = new FormData()
       formData.append('cv', file)
       
-      // API URL'i belirle
+      // API URL'i belirle - Vite proxy kullan
       let apiUrl = import.meta.env.VITE_API_URL
       if (!apiUrl) {
         if (import.meta.env.DEV) {
-          apiUrl = 'http://localhost:5000/api'
+          // Development'ta Vite proxy kullan
+          apiUrl = '/api'
         } else {
           apiUrl = 'https://master-application-agent-production.up.railway.app/api'
         }
