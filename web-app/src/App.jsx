@@ -157,18 +157,44 @@ function App() {
 
   // 3 temel parametreyi hesapla
   const calculateCoreMetrics = () => {
-    if (!results || !results.matches) return { gpa: 0, languageScore: 0, backgroundMatch: 0 }
+    if (!results || !results.matches || results.matches.length === 0) {
+      return { gpa: 0, languageScore: 0, backgroundMatch: 0 }
+    }
     
-    // İlk 3 üniversitenin ortalaması
+    // CV'den gelen veriler varsa onları kullan
+    if (cvData) {
+      const gpa = parseFloat(cvData.gpa) || 0
+      const langScore = parseFloat(cvData.languageTestScore) || 0
+      // Normalize dil skoru (TOEFL için)
+      const normalizedLang = cvData.languageTestType === 'toefl' 
+        ? (langScore / 120) * 100 
+        : langScore
+      
+      // Background match - seçilen background sayısına göre
+      const backgroundMatch = (cvData.background?.length || 0) * 10
+      
+      return {
+        gpa: gpa,
+        languageScore: normalizedLang,
+        backgroundMatch: Math.min(backgroundMatch, 100)
+      }
+    }
+    
+    // Sonuçlardan hesapla
     const top3 = results.matches.slice(0, 3)
-    const avgGPA = top3.reduce((sum, m) => sum + (m.match_score || 0), 0) / top3.length
-    const avgLanguage = 85 // Normalize edilmiş dil skoru
-    const avgBackground = avgGPA * 0.8 // Background match tahmini
+    if (top3.length === 0) return { gpa: 0, languageScore: 0, backgroundMatch: 0 }
+    
+    const avgMatch = top3.reduce((sum, m) => sum + (m.match_score || 0), 0) / top3.length
+    
+    // Match score'dan tahmin et (30% GPA, 20% Language, 15% Background)
+    const estimatedGPA = (avgMatch / 100) * 30 * (4.0 / 30) // 0-4.0 arası
+    const estimatedLang = (avgMatch / 100) * 20 * (100 / 20) // 0-100 arası
+    const estimatedBg = (avgMatch / 100) * 15 * (100 / 15) // 0-100 arası
     
     return {
-      gpa: avgGPA,
-      languageScore: avgLanguage,
-      backgroundMatch: avgBackground
+      gpa: estimatedGPA,
+      languageScore: estimatedLang,
+      backgroundMatch: estimatedBg
     }
   }
 
